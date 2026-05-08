@@ -43,11 +43,21 @@ function filterMatches(type, element) {
     document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
     element.classList.add('active');
     
-    let filtered = matches;
-    if (type === 'EN DIRECT' || type === 'LIVE') filtered = matches.filter(m => m.status === 'LIVE');
-    if (type === 'FAVORIS' || type === 'FAV') filtered = matches.filter(m => favorites.includes(m.team1) || favorites.includes(m.team2));
+    const container = document.getElementById('match-list');
+    
+    // On affiche des squelettes pendant 500ms
+    container.innerHTML = `
+        <div class="skeleton"></div>
+        <div class="skeleton"></div>
+        <div class="skeleton"></div>
+    `;
 
-    renderList(filtered, type);
+    setTimeout(() => {
+        let filtered = matches;
+        if (type === 'EN DIRECT' || type === 'LIVE') filtered = matches.filter(m => m.status === 'LIVE');
+        if (type === 'FAVORIS' || type === 'FAV') filtered = matches.filter(m => favorites.includes(m.team1) || favorites.includes(m.team2));
+        renderList(filtered, type);
+    }, 500); // 0.5 seconde de "faux" chargement
 }
 
 // TEMPS RÉEL
