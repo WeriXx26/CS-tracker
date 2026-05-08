@@ -1,31 +1,25 @@
-/* 1. VARIABLES & RESET */
 :root {
     --bg: #0b0d10;
-    --card: rgba(28, 32, 38, 0.8);
+    --card: rgba(28, 32, 38, 0.7);
     --accent: #ffb400;
     --text: #ffffff;
     --gray: #9ba1a6;
     --live: #ff4444;
-    --nav-bg: rgba(20, 24, 28, 0.95);
 }
 
-* {
-    box-sizing: border-box;
-    -webkit-tap-highlight-color: transparent; /* Supprime le flash bleu au clic sur mobile */
-}
+* { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
 
 body {
     background-color: #000;
     color: var(--text);
     font-family: 'Inter', sans-serif;
     margin: 0;
-    height: 100vh;
     display: flex;
     justify-content: center;
-    overflow: hidden; /* Empêche le scroll du body pour éviter les rebonds bizarres */
+    height: 100vh;
+    overflow: hidden;
 }
 
-/* 2. CONTAINER PRINCIPAL */
 .smartphone-container {
     width: 100%;
     max-width: 450px;
@@ -33,126 +27,86 @@ body {
     background: radial-gradient(circle at top, #1a1f26 0%, #0b0d10 100%);
     display: flex;
     flex-direction: column;
-    position: relative;
 }
 
-/* 3. HEADER & TABS */
+/* Header Centré */
 .app-header {
-    background: var(--nav-bg);
+    background: rgba(20, 24, 28, 0.95);
     backdrop-filter: blur(15px);
-    padding: 15px 20px;
+    padding: 20px 0 10px 0;
     border-bottom: 1px solid rgba(255,255,255,0.05);
-    z-index: 10;
-}
-
-h1 {
-    font-family: 'Orbitron', sans-serif;
-    font-size: 1.1rem;
-    color: var(--accent);
-    margin: 0;
-    text-transform: uppercase;
-}
-
-.tabs { display: flex; gap: 10px; margin-top: 15px; }
-.tab {
-    font-size: 0.7rem;
-    font-weight: 700;
-    color: var(--gray);
-    padding: 8px 16px;
-    border-radius: 20px;
-    cursor: pointer;
-    transition: 0.3s;
-}
-.tab.active {
-    color: var(--accent);
-    background: rgba(255, 180, 0, 0.15);
-}
-
-/* 4. ZONE DE DÉFILEMENT (MATCHS) */
-.content-area {
-    flex: 1;
-    overflow-y: auto;
-    padding: 15px;
-    padding-bottom: 100px; /* Espace pour le footer */
-}
-
-.match-card {
-    background: var(--card);
-    backdrop-filter: blur(10px);
-    border: 1px solid rgba(255,255,255,0.05);
-    border-radius: 16px;
-    padding: 20px;
-    margin-bottom: 15px;
-    cursor: pointer;
-    transition: transform 0.1s, border 0.3s;
-}
-
-.match-card:active {
-    transform: scale(0.96);
-    border-color: var(--accent);
-}
-
-/* 5. VUE DÉTAIL (LA CORRECTION) */
-#match-detail {
-    display: none; /* Piloté par le JS */
-    position: fixed; /* Fixé par rapport à l'écran */
-    top: 0;
-    left: 0;
-    width: 100%;
-    height: 100%;
-    background: var(--bg);
-    z-index: 9999; /* Toujours au-dessus du reste */
-    overflow-y: auto;
-    animation: slideIn 0.3s cubic-bezier(0.25, 0.8, 0.25, 1);
-}
-
-@keyframes slideIn {
-    from { transform: translateY(100%); }
-    to { transform: translateY(0); }
-}
-
-/* 6. FOOTER NAVIGATION */
-.app-footer {
-    position: absolute;
-    bottom: 0;
-    width: 100%;
-    background: var(--nav-bg);
-    backdrop-filter: blur(10px);
-    display: flex;
-    justify-content: space-around;
-    padding: 12px 0 30px; /* Padding généreux pour les barres d'iPhone */
-    border-top: 1px solid rgba(255,255,255,0.05);
     z-index: 100;
 }
 
-.nav-item {
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    opacity: 0.4;
-    transition: 0.3s;
-    cursor: pointer;
+.brand-center {
+    text-align: center;
+    margin-bottom: 20px;
 }
 
-.nav-item.active {
-    opacity: 1;
+.brand-center h1 {
+    font-family: 'Orbitron', sans-serif;
+    font-size: 1.4rem;
     color: var(--accent);
+    margin: 0;
+    letter-spacing: 4px;
 }
 
-.nav-icon { font-size: 1.3rem; }
-.nav-text { font-size: 0.6rem; margin-top: 4px; font-weight: 700; text-transform: uppercase; }
-
-/* 7. EFFETS SKELETON (CHARGEMENT) */
-.skeleton {
-    height: 100px;
-    background: linear-gradient(90deg, #1a1f26 25%, #252a30 50%, #1a1f26 75%);
-    background-size: 200% 100%;
-    animation: loading 1.5s infinite;
-    border-radius: 16px;
+/* Navigation principale */
+.main-nav {
+    display: flex;
+    justify-content: center;
+    gap: 30px;
     margin-bottom: 15px;
 }
 
-@keyframes loading {
-    from { background-position: 200% 0; }
-    to { background-position: -200% 0; }
+.nav-link {
+    font-family: 'Orbitron', sans-serif;
+    font-size: 0.7rem;
+    color: var(--gray);
+    cursor: pointer;
+    font-weight: 700;
+    position: relative;
+    padding-bottom: 5px;
+    transition: 0.3s;
+}
+
+.nav-link.active { color: var(--accent); }
+.nav-link.active::after {
+    content: '';
+    position: absolute;
+    bottom: 0; left: 0;
+    width: 100%; height: 2px;
+    background: var(--accent);
+    box-shadow: 0 0 8px var(--accent);
+}
+
+/* Tabs secondaires */
+.tabs { display: flex; justify-content: center; gap: 10px; padding: 10px 0; }
+.tab {
+    font-size: 0.6rem;
+    font-weight: 700;
+    color: var(--gray);
+    padding: 6px 12px;
+    border-radius: 4px;
+    cursor: pointer;
+}
+.tab.active { background: rgba(255, 180, 0, 0.1); color: var(--accent); }
+
+/* Match Cards */
+.content-area { flex: 1; overflow-y: auto; padding: 15px; }
+.match-card {
+    background: var(--card);
+    border-radius: 12px;
+    padding: 15px;
+    margin-bottom: 12px;
+    border: 1px solid rgba(255,255,255,0.03);
+}
+
+/* Detail Overlay Blindé */
+.detail-overlay {
+    display: none;
+    position: fixed;
+    top: 0; left: 0; width: 100%; height: 100%;
+    background: var(--bg);
+    z-index: 9999;
 }
