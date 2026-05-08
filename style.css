@@ -1,25 +1,31 @@
+/* 1. VARIABLES & RESET */
 :root {
     --bg: #0b0d10;
-    --card: rgba(28, 32, 38, 0.7);
+    --card: rgba(28, 32, 38, 0.8);
     --accent: #ffb400;
     --text: #ffffff;
     --gray: #9ba1a6;
     --live: #ff4444;
+    --nav-bg: rgba(20, 24, 28, 0.95);
 }
 
-* { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
+* {
+    box-sizing: border-box;
+    -webkit-tap-highlight-color: transparent; /* Supprime le flash bleu au clic sur mobile */
+}
 
 body {
     background-color: #000;
     color: var(--text);
     font-family: 'Inter', sans-serif;
     margin: 0;
+    height: 100vh;
     display: flex;
     justify-content: center;
-    height: 100vh;
-    overflow: hidden;
+    overflow: hidden; /* Empêche le scroll du body pour éviter les rebonds bizarres */
 }
 
+/* 2. CONTAINER PRINCIPAL */
 .smartphone-container {
     width: 100%;
     max-width: 450px;
@@ -30,54 +36,123 @@ body {
     position: relative;
 }
 
-/* Header & Typography */
+/* 3. HEADER & TABS */
 .app-header {
-    background: rgba(20, 24, 28, 0.9);
-/* Animation de balayage brillant */
-@keyframes shimmer {
-    0% { background-position: -468px 0; }
-    100% { background-position: 468px 0; }
+    background: var(--nav-bg);
+    backdrop-filter: blur(15px);
+    padding: 15px 20px;
+    border-bottom: 1px solid rgba(255,255,255,0.05);
+    z-index: 10;
 }
 
-.skeleton {
-    height: 100px;
-    margin-bottom: 15px;
-    background: linear-gradient(to right, #1a1f26 8%, #252a30 18%, #1a1f26 33%);
-    background-size: 800px 104px;
-    animation: shimmer 1.2s linear infinite forwards;
-    border-radius: 16px;
-}
-
-/* Badge de score plus stylé */
-.score-badge {
-    background: linear-gradient(135deg, var(--accent) 0%, #ff8c00 100%);
-    color: black !important;
-    font-weight: 800;
-    padding: 2px 10px;
-    border-radius: 4px;
-    box-shadow: 0 0 10px rgba(255, 180, 0, 0.4);
-}
-/* Conteneur de stat */
-.stat-row {
-    margin-bottom: 15px;
-}
-.stat-label {
-    display: flex;
-    justify-content: space-between;
-    font-size: 0.7rem;
-    color: var(--gray);
-    margin-bottom: 5px;
+h1 {
+    font-family: 'Orbitron', sans-serif;
+    font-size: 1.1rem;
+    color: var(--accent);
+    margin: 0;
     text-transform: uppercase;
 }
-.stat-bar-bg {
-    background: rgba(255,255,255,0.05);
-    height: 6px;
-    border-radius: 3px;
-    overflow: hidden;
+
+.tabs { display: flex; gap: 10px; margin-top: 15px; }
+.tab {
+    font-size: 0.7rem;
+    font-weight: 700;
+    color: var(--gray);
+    padding: 8px 16px;
+    border-radius: 20px;
+    cursor: pointer;
+    transition: 0.3s;
 }
-.stat-bar-fill {
-    background: var(--accent);
+.tab.active {
+    color: var(--accent);
+    background: rgba(255, 180, 0, 0.15);
+}
+
+/* 4. ZONE DE DÉFILEMENT (MATCHS) */
+.content-area {
+    flex: 1;
+    overflow-y: auto;
+    padding: 15px;
+    padding-bottom: 100px; /* Espace pour le footer */
+}
+
+.match-card {
+    background: var(--card);
+    backdrop-filter: blur(10px);
+    border: 1px solid rgba(255,255,255,0.05);
+    border-radius: 16px;
+    padding: 20px;
+    margin-bottom: 15px;
+    cursor: pointer;
+    transition: transform 0.1s, border 0.3s;
+}
+
+.match-card:active {
+    transform: scale(0.96);
+    border-color: var(--accent);
+}
+
+/* 5. VUE DÉTAIL (LA CORRECTION) */
+#match-detail {
+    display: none; /* Piloté par le JS */
+    position: fixed; /* Fixé par rapport à l'écran */
+    top: 0;
+    left: 0;
+    width: 100%;
     height: 100%;
-    border-radius: 3px;
-    transition: width 1s ease-out;
+    background: var(--bg);
+    z-index: 9999; /* Toujours au-dessus du reste */
+    overflow-y: auto;
+    animation: slideIn 0.3s cubic-bezier(0.25, 0.8, 0.25, 1);
+}
+
+@keyframes slideIn {
+    from { transform: translateY(100%); }
+    to { transform: translateY(0); }
+}
+
+/* 6. FOOTER NAVIGATION */
+.app-footer {
+    position: absolute;
+    bottom: 0;
+    width: 100%;
+    background: var(--nav-bg);
+    backdrop-filter: blur(10px);
+    display: flex;
+    justify-content: space-around;
+    padding: 12px 0 30px; /* Padding généreux pour les barres d'iPhone */
+    border-top: 1px solid rgba(255,255,255,0.05);
+    z-index: 100;
+}
+
+.nav-item {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    opacity: 0.4;
+    transition: 0.3s;
+    cursor: pointer;
+}
+
+.nav-item.active {
+    opacity: 1;
+    color: var(--accent);
+}
+
+.nav-icon { font-size: 1.3rem; }
+.nav-text { font-size: 0.6rem; margin-top: 4px; font-weight: 700; text-transform: uppercase; }
+
+/* 7. EFFETS SKELETON (CHARGEMENT) */
+.skeleton {
+    height: 100px;
+    background: linear-gradient(90deg, #1a1f26 25%, #252a30 50%, #1a1f26 75%);
+    background-size: 200% 100%;
+    animation: loading 1.5s infinite;
+    border-radius: 16px;
+    margin-bottom: 15px;
+}
+
+@keyframes loading {
+    from { background-position: 200% 0; }
+    to { background-position: -200% 0; }
 }
