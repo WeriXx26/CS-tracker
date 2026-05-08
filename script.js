@@ -37,45 +37,43 @@ function renderList(list) {
 }
 
 function openMatchDetail(id) {
+    console.log("Tentative d'ouverture du match ID:", id); // Vérification console
+    
     const m = matches.find(match => match.id === id);
     const view = document.getElementById('match-detail');
     
-    if (!view) return;
+    if (!m || !view) {
+        console.error("Match ou Vue introuvable !");
+        return;
+    }
 
-    // On remplit la fenêtre noire avec du contenu visible
+    // On force l'affichage du contenu avec des styles ultra-visibles
     view.innerHTML = `
-        <div style="padding:25px; color:white; font-family:'Inter', sans-serif;">
-            <!-- Bouton Retour bien visible -->
-            <button onclick="closeDetail()" style="background:var(--accent); color:black; border:none; padding:12px 20px; border-radius:8px; font-weight:bold; cursor:pointer; font-family:'Orbitron';">
+        <div style="position:fixed; top:0; left:0; width:100%; height:100%; background:#0b0d10; color:white; z-index:10000; padding:20px; overflow-y:auto; display:block;">
+            <button onclick="closeDetail()" style="background:#ffb400; color:black; border:none; padding:15px 25px; border-radius:8px; font-weight:bold; cursor:pointer; margin-bottom:30px;">
                 ← RETOUR
             </button>
 
-            <div style="margin-top:40px; text-align:center;">
-                <h2 style="font-family:'Orbitron'; color:var(--accent); letter-spacing:2px;">
+            <div style="text-align:center;">
+                <h2 style="font-family:'Orbitron', sans-serif; font-size:1.5rem; color:#ffb400; margin-bottom:10px;">
                     ${m.team1} vs ${m.team2}
                 </h2>
-                <p style="color:var(--gray); margin-bottom:30px;">Match ID: #${id}</p>
+                <p style="color:#9ba1a6; margin-bottom:30px;">Match en cours</p>
                 
-                <!-- Simulation de Stats -->
-                <div style="background:rgba(255,255,255,0.05); padding:20px; border-radius:15px; border:1px solid rgba(255,255,255,0.1);">
-                    <h3 style="font-size:0.8rem; color:var(--accent); margin-bottom:15px;">PROBABILITÉS DE VICTOIRE</h3>
-                    <div style="display:flex; justify-content:space-between; margin-bottom:5px; font-size:0.7rem;">
-                        <span>${m.team1}</span>
-                        <span>50%</span>
-                    </div>
-                    <div style="background:rgba(255,255,255,0.1); height:10px; border-radius:5px; overflow:hidden;">
-                        <div style="background:var(--accent); width:50%; height:100%;"></div>
-                    </div>
+                <div style="background:rgba(255,255,255,0.05); padding:20px; border-radius:15px; border:1px solid rgba(255,255,255,0.1); margin-bottom:20px;">
+                    <p style="font-size:0.9rem;">SCORE ACTUEL</p>
+                    <p style="font-size:2.5rem; font-weight:bold; color:#ffb400;">${m.score || '0 - 0'}</p>
                 </div>
 
-                <button style="width:100%; margin-top:40px; padding:20px; background:#9146ff; color:white; border:none; border-radius:15px; font-weight:bold; font-family:'Orbitron'; shadow: 0 10px 20px rgba(0,0,0,0.5);">
-                    REGARDER LE LIVE
-                </button>
+                <div style="padding:20px; border:2px dashed #ffb400; border-radius:15px; color:#ffb400;">
+                    ZONE DE STATISTIQUES ACTIVE
+                </div>
             </div>
         </div>
     `;
 
     view.style.display = 'block';
+    console.log("Vue détail affichée avec succès");
 }
 
 function closeDetail() {
