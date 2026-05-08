@@ -144,26 +144,62 @@ function getCountdown(startTime) {
 function openMatchDetail(id) {
     const m = matches.find(match => match.id === id);
     const view = document.getElementById('match-detail');
+    
+    // On simule des stats pour l'exemple
+    const stats = {
+        adr: 85,
+        kast: 72,
+        entry: 54
+    };
+
     view.innerHTML = `
-        <div style="padding:25px; height:100%; display:flex; flex-direction:column; background: linear-gradient(to bottom, #1a1f26, #0b0d10);">
-            <button onclick="closeDetail()" style="background:none; border:none; color:var(--accent); font-weight:800; padding:15px 0; font-family:Orbitron; cursor:pointer;">← RETOUR</button>
+        <div style="padding:20px; height:100%; display:flex; flex-direction:column; overflow-y:auto; background: #0b0d10;">
+            <button onclick="closeDetail()" style="background:none; border:none; color:var(--accent); font-weight:800; padding:10px 0; font-family:Orbitron; cursor:pointer;">← BACK</button>
             
-            <div class="match-card" style="margin-top:20px; text-align:center; padding:40px 20px; background:rgba(255,255,255,0.03);">
-                <p style="color:var(--accent); font-size:0.7rem; letter-spacing:2px; font-weight:700; margin-bottom:20px;">${m.league}</p>
-                <div style="display:flex; justify-content:center; align-items:center; gap:25px;">
-                    <div><img src="${m.logo1}" width="70"><h3>${m.team1}</h3></div>
-                    <div style="font-size:1.5rem; font-weight:900; opacity:0.2;">VS</div>
-                    <div><img src="${m.logo2}" width="70"><h3>${m.team2}</h3></div>
+            <!-- En-tête Score -->
+            <div class="match-card" style="text-align:center; padding:30px 10px; background:linear-gradient(to bottom, rgba(255,180,0,0.05), transparent);">
+                <div style="display:flex; justify-content:center; align-items:center; gap:20px;">
+                    <div style="width:80px;"><img src="${m.logo1}" style="width:100%;"><h4 style="margin:5px 0; font-size:0.8rem;">${m.team1}</h4></div>
+                    <div style="font-size:1.8rem; font-weight:900; color:var(--accent);">${m.score}</div>
+                    <div style="width:80px;"><img src="${m.logo2}" style="width:100%;"><h4 style="margin:5px 0; font-size:0.8rem;">${m.team2}</h4></div>
                 </div>
-                <div style="margin-top:30px; border-top:1px solid rgba(255,255,255,0.05); padding-top:20px;">
-                    <div style="display:flex; justify-content:space-around; font-size:0.8rem; color:var(--gray);">
-                        <div>FORMAT: BO3</div>
-                        <div>MAP: DUST II</div>
-                    </div>
-                </div>
-                <button style="background:#9146ff; color:white; border:none; padding:18px; border-radius:14px; width:100%; margin-top:40px; font-weight:800; font-size:0.9rem; box-shadow: 0 10px 20px rgba(145, 70, 255, 0.3);">REGARDER SUR TWITCH</button>
             </div>
+
+            <!-- Section Statistiques -->
+            <div style="margin-top:20px;">
+                <h3 style="font-family:Orbitron; font-size:0.8rem; color:var(--accent); margin-bottom:20px; letter-spacing:1px;">PERFORMANCES ÉQUIPE</h3>
+                
+                <!-- ADR -->
+                <div class="stat-row">
+                    <div class="stat-label"><span>ADR Moyen</span><span>${stats.adr}</span></div>
+                    <div class="stat-bar-bg"><div class="stat-bar-fill" style="width: ${stats.adr}%"></div></div>
+                </div>
+
+                <!-- KAST -->
+                <div class="stat-row">
+                    <div class="stat-label"><span>KAST %</span><span>${stats.kast}%</span></div>
+                    <div class="stat-bar-bg"><div class="stat-bar-fill" style="width: ${stats.kast}%"></div></div>
+                </div>
+
+                <!-- Entry Success -->
+                <div class="stat-row">
+                    <div class="stat-label"><span>Entry Success</span><span>${stats.entry}%</span></div>
+                    <div class="stat-bar-bg"><div class="stat-bar-fill" style="width: ${stats.entry}%"></div></div>
+                </div>
+            </div>
+
+            <!-- Comparaison Joueurs (Exemple rapide) -->
+            <div style="margin-top:20px; background:var(--card); padding:15px; border-radius:12px;">
+                <h4 style="font-size:0.7rem; color:var(--gray); margin-bottom:15px; text-align:center;">TOP FRAGGER</h4>
+                <div style="display:flex; justify-content:space-between; align-items:center;">
+                    <span style="font-weight:700;">ZywOo</span>
+                    <span style="color:var(--accent); font-weight:800;">1.42 Rating</span>
+                </div>
+            </div>
+
+            <button style="background:#9146ff; color:white; border:none; padding:18px; border-radius:14px; width:100%; margin-top:30px; font-weight:800; font-size:0.9rem;">WATCH ON TWITCH</button>
         </div>`;
+    
     view.style.display = 'block';
 }
 
