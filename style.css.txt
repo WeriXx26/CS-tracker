@@ -1,0 +1,35 @@
+:root {
+    --bg: #0b0d10;
+    --card: rgba(28, 32, 38, 0.7);
+    --accent: #ffb400;
+    --text: #ffffff;
+    --gray: #9ba1a6;
+    --live: #ff4444;
+}
+
+* { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
+
+body {
+    background-color: #000;
+    color: var(--text);
+    font-family: 'Inter', sans-serif;
+    margin: 0;
+    display: flex;
+    justify-content: center;
+    height: 100vh;
+    overflow: hidden;
+}
+
+.smartphone-container {
+    width: 100%;
+    max-width: 450px;
+    height: 100%;
+    background: radial-gradient(circle at top, #1a1f26 0%, #0b0d10 100%);
+    display: flex;
+    flex-direction: column;
+    position: relative;
+}
+
+/* Header & Typography */
+.app-header {
+    background: rgba(20, 24, 28, 0.9);

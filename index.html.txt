@@ -1,0 +1,59 @@
+<link rel="stylesheet" href="style.css">
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <title>CS2 TRACKER PRO</title>
+    
+    <!-- Polices Premium -->
+    <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@700&family=Inter:wght@300;400;600&display=swap" rel="stylesheet">
+</head>
+<script src="script.js"></script>
+<body>
+
+<div class="smartphone-container">
+    <!-- Header avec effet de flou -->
+    <header class="app-header">
+        <div class="status-bar">14:51 📱</div>
+        <div class="nav-main">
+            <h1>CS2 Tracker</h1>
+            <button class="refresh-btn" onclick="location.reload()">🔄</button>
+        </div>
+        
+        <div class="tabs">
+            <div class="tab active" onclick="filterMatches('TOUS', this)">TOUS</div>
+            <div class="tab" onclick="filterMatches('LIVE', this)">EN DIRECT</div>
+            <div class="tab" onclick="filterMatches('FAV', this)">FAVORIS</div>
+        </div>
+    </header>
+
+    <!-- Zone de contenu -->
+    <main id="match-list" class="content-area">
+        <div class="loader">Synchronisation...</div>
+    </main>
+
+    <!-- Overlay de Détail (Slide-in) -->
+    <div id="match-detail" class="detail-overlay"></div>
+
+    <!-- Navigation Footer -->
+    <footer class="app-footer">
+        <div onclick="navigateTo('matches')" id="nav-matches" class="nav-item active">
+            <span class="nav-icon">🎮</span>
+            <span class="nav-text">Matchs</span>
+        </div>
+        <div onclick="navigateTo('news')" id="nav-news" class="nav-item">
+            <span class="nav-icon">📰</span>
+            <span class="nav-text">Actu</span>
+        </div>
+        <div onclick="navigateTo('settings')" id="nav-settings" class="nav-item">
+            <span class="nav-icon">⚙️</span>
+            <span class="nav-text">Profil</span>
+        </div>
+    </footer>
+</div>
+
+</body>
+</html>
