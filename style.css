@@ -57,3 +57,27 @@ body {
     border-radius: 4px;
     box-shadow: 0 0 10px rgba(255, 180, 0, 0.4);
 }
+/* Conteneur de stat */
+.stat-row {
+    margin-bottom: 15px;
+}
+.stat-label {
+    display: flex;
+    justify-content: space-between;
+    font-size: 0.7rem;
+    color: var(--gray);
+    margin-bottom: 5px;
+    text-transform: uppercase;
+}
+.stat-bar-bg {
+    background: rgba(255,255,255,0.05);
+    height: 6px;
+    border-radius: 3px;
+    overflow: hidden;
+}
+.stat-bar-fill {
+    background: var(--accent);
+    height: 100%;
+    border-radius: 3px;
+    transition: width 1s ease-out;
+}
