@@ -16,10 +16,23 @@ function navigateTo(page) {
     document.getElementById('nav-' + page).classList.add('active');
     closeDetail();
 
-    if (page === 'matches') {
-        document.querySelector('.tabs').style.display = 'flex';
-        const activeTab = document.querySelector('.tab.active');
-        filterMatches(activeTab.innerText, activeTab);
+    // ... dans navigateTo(page) ...
+else if (page === 'news') {
+    document.querySelector('.tabs').style.display = 'none';
+    container.innerHTML = `
+        <h2 style="font-family:Orbitron; font-size:1rem; margin-bottom:20px;">BREVIÈVES CS2</h2>
+        <div class="news-card" style="margin-bottom:20px;">
+            <img src="https://news.esea.net/content/images/2023/09/CS2_1.jpg" style="width:100%; border-radius:12px; margin-bottom:10px;">
+            <h3 style="font-size:0.9rem; margin:5px 0;">MAJ : Le retour de Train sur CS2 ?</h3>
+            <p style="font-size:0.7rem; color:var(--gray);">Des fichiers trouvés dans la dernière mise à jour laissent planer le doute...</p>
+        </div>
+        <div class="news-card" style="margin-bottom:20px;">
+            <img src="https://img.vavel.com/b/Vitality_CS2.jpg" style="width:100%; border-radius:12px; margin-bottom:10px;">
+            <h3 style="font-size:0.9rem; margin:5px 0;">Vitality reprend la place de n°1 mondial</h3>
+            <p style="font-size:0.7rem; color:var(--gray);">Après leur victoire au dernier tournoi, les abeilles dominent le classement HLTV.</p>
+        </div>
+    `;
+}
     } else {
         document.querySelector('.tabs').style.display = 'none';
         container.innerHTML = `<div style="padding:40px; text-align:center; color:var(--gray)">Onglet ${page.toUpperCase()} en cours de développement...</div>`;
