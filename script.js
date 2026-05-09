@@ -2,25 +2,21 @@
  * 1. DONNÉES DE L'APPLICATION
  */
 const matches = [
-    { id: 1, team1: "Vitality", logo1: "https://i.ibb.co/f4pC6qF/vitality.png", team2: "G2", logo2: "https://i.ibb.co/L5T4FqC/g2.png", league: "PGL MAJOR", status: "LIVE", score: "1 - 0", startTime: new Date().getTime() },
-    { id: 2, team1: "FaZe", logo1: "https://i.ibb.co/JqjXkM6/faze.png", team2: "NaVi", logo2: "https://i.ibb.co/BccC4W8/navi.png", league: "IEM KATOWICE", status: "UPCOMING", score: "0 - 0", startTime: new Date().getTime() + 3600000 }
+    { id: 1, team1: "Vitality", logo1: "https://i.ibb.co/f4pC6qF/vitality.png", team2: "G2", logo2: "https://i.ibb.co/L5T4FqC/g2.png", league: "PGL MAJOR", status: "LIVE", score: "1 - 0" },
+    { id: 2, team1: "FaZe", logo1: "https://i.ibb.co/JqjXkM6/faze.png", team2: "NaVi", logo2: "https://i.ibb.co/BccC4W8/navi.png", league: "IEM KATOWICE", status: "UPCOMING", score: "0 - 0" }
 ];
 
 let favorites = JSON.parse(localStorage.getItem('cs2_favs')) || [];
-let currentPage = 'matches';
 
 /**
- * 2. NAVIGATION ET ONGLETS
+ * 2. NAVIGATION PRINCIPALE
  */
 function navigateTo(page) {
-    // Fermer le détail si on change d'onglet
     closeDetail();
-    
-    currentPage = page;
     const container = document.getElementById('match-list');
     const subTabs = document.getElementById('sub-tabs');
 
-    // Mise à jour visuelle de la navigation haute
+    // Update style des liens
     document.querySelectorAll('.nav-link').forEach(el => el.classList.remove('active'));
     const activeNav = document.getElementById('nav-' + page);
     if (activeNav) activeNav.classList.add('active');
@@ -37,32 +33,32 @@ function navigateTo(page) {
         if (subTabs) subTabs.style.display = 'none';
         container.innerHTML = `
             <div style="text-align:center; padding:50px; animation: fadeIn 0.5s;">
-                <h2 style="font-family:Orbitron; color:var(--accent); font-size:1rem;">PROFIL & SETTINGS</h2>
-                <button onclick="localStorage.clear(); location.reload();" style="margin-top:20px; background:rgba(255,0,0,0.1); color:red; border:1px solid red; padding:15px; border-radius:12px; cursor:pointer; width:100%;">RÉINITIALISER L'APP</button>
+                <h2 style="font-family:Orbitron; color:var(--accent); font-size:1rem;">RÉGLAGES</h2>
+                <button onclick="localStorage.clear(); location.reload();" style="margin-top:20px; background:rgba(255,0,0,0.1); color:red; border:1px solid red; padding:15px; border-radius:12px; cursor:pointer; width:100%; font-weight:bold;">EFFACER LE CACHE</button>
             </div>`;
     }
 }
 
 /**
- * 3. SYSTÈME DE NEWS
+ * 3. SYSTÈME DE NEWS (L'onglet qui était vide)
  */
 function renderNews(container) {
     const articles = [
         {
-            title: "MAJ : Train fait son grand retour ?",
-            desc: "Des rumeurs persistantes et des fichiers cachés indiquent que Valve prépare le retour de la map mythique.",
+            title: "Le retour de Train ?",
+            desc: "Des rumeurs persistantes indiquent que Valve prépare le retour de la map mythique pour la prochaine saison.",
             img: "https://news.esea.net/content/images/2023/09/CS2_1.jpg"
         },
         {
-            title: "Vitality confirme sa domination",
-            desc: "Après une victoire écrasante hier, ZywOo et ses coéquipiers reprennent la tête du classement mondial.",
+            title: "Vitality en démonstration",
+            desc: "L'équipe française confirme sa forme actuelle en dominant le classement mondial HLTV ce mois-ci.",
             img: "https://img.vavel.com/b/Vitality_CS2.jpg"
         }
     ];
 
     container.innerHTML = `
         <div style="animation: fadeIn 0.5s ease-out;">
-            <h2 style="font-family:Orbitron; font-size:0.9rem; margin-bottom:20px; text-align:center; color:var(--accent);">DERNIÈRES ACTUS</h2>
+            <h2 style="font-family:Orbitron; font-size:0.9rem; margin-bottom:20px; text-align:center; color:var(--accent); letter-spacing:2px;">ACTUALITÉS</h2>
             ${articles.map(art => `
                 <div class="news-card">
                     <img src="${art.img}">
@@ -77,7 +73,7 @@ function renderNews(container) {
 }
 
 /**
- * 4. GESTION DES MATCHS
+ * 4. LOGIQUE DES MATCHS
  */
 function filterMatches(type, element) {
     if (element) {
@@ -87,9 +83,7 @@ function filterMatches(type, element) {
     
     let filtered = matches;
     if (type === 'LIVE') filtered = matches.filter(m => m.status === 'LIVE');
-    if (type === 'FAVORIS' || type === 'FAV') {
-        filtered = matches.filter(m => favorites.includes(m.team1) || favorites.includes(m.team2));
-    }
+    if (type === 'FAVORIS') filtered = matches.filter(m => favorites.includes(m.team1) || favorites.includes(m.team2));
 
     renderList(filtered);
 }
@@ -102,9 +96,9 @@ function renderList(list) {
         container.innerHTML += `
             <div class="match-card" onclick="openMatchDetail(${m.id})">
                 <div style="display:flex; justify-content:space-between; align-items:center; pointer-events:none;">
-                    <div style="width:30%; text-align:center;"><img src="${m.logo1}" width="35"><div style="font-size:0.7rem; font-weight:bold;">${m.team1}</div></div>
-                    <div style="text-align:center;"><div style="font-size:1.3rem; font-weight:900; color:var(--accent);">${m.score}</div><div style="font-size:0.5rem; color:var(--gray);">${m.status}</div></div>
-                    <div style="width:30%; text-align:center;"><img src="${m.logo2}" width="35"><div style="font-size:0.7rem; font-weight:bold;">${m.team2}</div></div>
+                    <div style="width:30%; text-align:center;"><img src="${m.logo1}" width="35"><div style="font-size:0.7rem; font-weight:bold; margin-top:5px;">${m.team1}</div></div>
+                    <div style="text-align:center; flex:1;"><div style="font-size:1.3rem; font-weight:900; color:var(--accent);">${m.score}</div><div style="font-size:0.5rem; color:var(--gray);">${m.status}</div></div>
+                    <div style="width:30%; text-align:center;"><img src="${m.logo2}" width="35"><div style="font-size:0.7rem; font-weight:bold; margin-top:5px;">${m.team2}</div></div>
                 </div>
             </div>`;
     });
@@ -122,26 +116,26 @@ function openMatchDetail(id) {
         <div style="position:fixed; top:0; left:0; width:100%; height:100%; background:var(--bg); color:white; z-index:10000; padding:20px; overflow-y:auto; animation: fadeIn 0.3s;">
             <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:30px;">
                 <button onclick="closeDetail()" style="background:rgba(255,180,0,0.1); color:var(--accent); border:1px solid var(--accent); padding:10px 15px; border-radius:8px; font-weight:bold; cursor:pointer;">← RETOUR</button>
-                <span style="font-family:'Orbitron'; font-size:0.75rem; color:var(--accent); letter-spacing:2px;">LIVE ANALYTICS</span>
+                <span style="font-family:'Orbitron'; font-size:0.75rem; color:var(--accent); letter-spacing:2px;">DIRECT ANALYTICS</span>
                 <div style="width:40px;"></div>
             </div>
 
             <div style="background:var(--card); border-radius:20px; padding:30px 10px; text-align:center; border:1px solid rgba(255,255,255,0.05); margin-bottom:20px;">
                 <div style="display:flex; justify-content:space-around; align-items:center;">
                     <div style="width:35%;"><img src="${m.logo1}" width="55"><h4>${m.team1}</h4></div>
-                    <div style="width:30%;"><div style="font-size:2.2rem; font-weight:900; color:var(--accent);">${m.score}</div><div style="font-size:0.6rem; color:var(--gray);">BO3</div></div>
+                    <div style="width:30%;"><div style="font-size:2.2rem; font-weight:900; color:var(--accent);">${m.score}</div><div style="font-size:0.6rem; color:var(--gray);">LIVE</div></div>
                     <div style="width:35%;"><img src="${m.logo2}" width="55"><h4>${m.team2}</h4></div>
                 </div>
             </div>
 
             <div style="background:rgba(255,255,255,0.02); border-radius:15px; padding:20px; border:1px solid rgba(255,255,255,0.05);">
                 <div style="margin-bottom:20px;">
-                    <div style="display:flex; justify-content:space-between; font-size:0.7rem; margin-bottom:8px;"><span>Probabilité Victoire</span><span style="color:var(--accent);">65%</span></div>
+                    <div style="display:flex; justify-content:space-between; font-size:0.7rem; margin-bottom:8px;"><span>Probabilité de victoire</span><span style="color:var(--accent);">65%</span></div>
                     <div style="height:6px; background:rgba(255,255,255,0.1); border-radius:3px; overflow:hidden;"><div style="width:65%; height:100%; background:var(--accent);"></div></div>
                 </div>
                 <div style="margin-bottom:10px;">
-                    <div style="display:flex; justify-content:space-between; font-size:0.7rem; margin-bottom:8px;"><span>Team ADR</span><span style="color:var(--accent);">82.4</span></div>
-                    <div style="height:6px; background:rgba(255,255,255,0.1); border-radius:3px; overflow:hidden;"><div style="width:82%; height:100%; background:white; opacity:0.6;"></div></div>
+                    <div style="display:flex; justify-content:space-between; font-size:0.7rem; margin-bottom:8px;"><span>Impact ADR</span><span style="color:var(--accent);">84.2</span></div>
+                    <div style="height:6px; background:rgba(255,255,255,0.1); border-radius:3px; overflow:hidden;"><div style="width:84%; height:100%; background:white; opacity:0.6;"></div></div>
                 </div>
             </div>
 
@@ -156,5 +150,4 @@ function closeDetail() {
     if (view) view.style.display = 'none';
 }
 
-// Lancement
 window.onload = () => navigateTo('matches');
