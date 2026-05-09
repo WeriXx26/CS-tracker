@@ -56,19 +56,36 @@ function renderList(list) {
     });
 }
 
-function renderNews(container) {
-    const articles = [
-        { title: "Retour de Train ?", desc: "Valve préparerait une surprise pour la saison prochaine.", img: "https://news.esea.net/content/images/2023/09/CS2_1.jpg" },
-        { title: "ZywOo MVP", desc: "Vitality domine outrageusement le dernier tournoi.", img: "https://img.vavel.com/b/Vitality_CS2.jpg" }
-    ];
-    container.innerHTML = articles.map(art => `
-        <div class="news-card" style="animation: fadeIn 0.4s;">
-            <img src="${art.img}">
-            <div class="news-content">
-                <h3>${art.title}</h3>
-                <p>${art.desc}</p>
-            </div>
-        </div>`).join('');
+async function renderNews(container) {
+    container.innerHTML = `<div style="text-align:center; padding:50px; color:var(--accent);">CHARGEMENT DES NEWS...</div>`;
+
+    try {
+        // Utilisation d'un flux RSS Esport (via un convertisseur JSON gratuit)
+        const rssUrl = 'https://www.team-aaa.com/rss/news.xml'; 
+        const response = await fetch(`https://api.rss2json.com/v1/api.json?rss_url=${encodeURIComponent(rssUrl)}`);
+        const data = await response.json();
+
+        if (data.status === 'ok') {
+            container.innerHTML = `
+                <div style="animation: fadeIn 0.5s ease-out;">
+                    <h2 style="font-family:Orbitron; font-size:0.9rem; margin-bottom:20px; text-align:center; color:var(--accent); letter-spacing:2px;">ACTUALITÉS TEMPS RÉEL</h2>
+                    ${data.items.slice(0, 8).map(art => `
+                        <div class="news-card" onclick="window.open('${art.link}', '_blank')">
+                            <img src="${art.thumbnail || 'https://via.placeholder.com/400x200?text=CS2+Esport'}" onerror="this.src='https://via.placeholder.com/400x200?text=CS2+News'">
+                            <div class="news-content">
+                                <h3 style="font-size:0.85rem; line-height:1.2;">${art.title}</h3>
+                                <p style="font-size:0.7rem; margin-top:8px; opacity:0.8;">${art.pubDate.split(' ')[0]}</p>
+                            </div>
+                        </div>
+                    `).join('')}
+                </div>
+            `;
+        } else {
+            throw new Error();
+        }
+    } catch (error) {
+        container.innerHTML = `<div style="text-align:center; padding:50px; color:red;">Erreur de chargement des news. Réessayez plus tard.</div>`;
+    }
 }
 
 function openMatchDetail(id) {
