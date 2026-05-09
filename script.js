@@ -2,7 +2,7 @@
  * 1. CONFIGURATION
  */
 const PANDA_TOKEN = 'GOA-V3x_Qi2zV7-bZhurTmpB78ZojtXQDLpG23ApSgj8dSFzfRQ'; // <--- VERIFIE BIEN TON TOKEN SANS ESPACES
-const PROXY = 'https://api.allorigins.win/raw?url=';
+const PROXY = 'https://corsproxy.io/?';
 const API_MATCHS = 'https://api.pandascore.co/csgo/matches?sort=status&per_page=20';
 const API_TEAMS_TOP100 = 'https://api.pandascore.co/csgo/teams?sort=-videogame_score&per_page=100';
 
