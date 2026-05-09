@@ -37,28 +37,31 @@ function navigateTo(page) {
 /**
  * 3. SYSTÈME DE NEWS (Avec liens cliquables)
  */
+/**
+ * 3. SYSTÈME DE NEWS (Correction des liens)
+ */
 function renderNews(container) {
     const realNews = [
         {
-            title: "Mise à jour CS2 : Le retour de Train ?",
-            desc: "Les derniers fichiers extraits montrent des textures retravaillées pour la map légendaire.",
+            title: "Mise à jour CS2 : Notes de patch officielles",
+            desc: "Découvrez les derniers changements apportés par Valve sur les cartes et le gameplay.",
             img: "https://news.esea.net/content/images/2023/09/CS2_1.jpg",
             tag: "OFFICIEL",
-            url: "https://www.counter-strike.net/news"
+            url: "https://www.counter-strike.net/news" // Lien direct vers le blog officiel
         },
         {
-            title: "Vitality : ZywOo prolonge son contrat",
-            desc: "L'organisation française annonce que son joueur star restera jusqu'en 2027.",
+            title: "Classement Mondial HLTV : Le Top 20",
+            desc: "Consultez l'évolution des meilleures équipes mondiales après les derniers tournois.",
             img: "https://img.vavel.com/b/Vitality_CS2.jpg",
-            tag: "TRANSFERT",
-            url: "https://www.hltv.org/news"
+            tag: "CLASSEMENT",
+            url: "https://www.hltv.org/ranking/teams" // Lien vers le classement (toujours actif)
         },
         {
-            title: "Major 2026 : Shanghaï se prépare",
-            desc: "Les travaux de l'arène avancent. Le prochain Major s'annonce historique.",
+            title: "Calendrier des prochains Majors",
+            desc: "Toutes les dates et lieux des prochains tournois mondiaux annoncés par Valve.",
             img: "https://prosettings.net/wp-content/uploads/cs2-guide.png",
             tag: "EVENT",
-            url: "https://www.hltv.org/events"
+            url: "https://www.hltv.org/events" // Lien vers les événements (toujours actif)
         }
     ];
 
@@ -66,7 +69,7 @@ function renderNews(container) {
         <div style="animation: fadeIn 0.5s ease-out;">
             <h2 style="font-family:Orbitron; font-size:0.8rem; margin-bottom:20px; text-align:center; color:var(--accent); letter-spacing:2px;">ACTUALITÉS LIVE</h2>
             ${realNews.map(art => `
-                <div class="news-card" onclick="window.open('${art.url}', '_blank')" style="margin-bottom:20px; border:1px solid rgba(255,255,255,0.05); background:var(--card); border-radius:15px; overflow:hidden; cursor:pointer;">
+                <div class="news-card" onclick="window.location.href='${art.url}'" style="margin-bottom:20px; border:1px solid rgba(255,255,255,0.05); background:var(--card); border-radius:15px; overflow:hidden; cursor:pointer;">
                     <div style="position:relative;">
                         <img src="${art.img}" style="width:100%; height:160px; object-fit:cover;">
                         <span style="position:absolute; top:10px; left:10px; background:var(--accent); color:black; font-size:0.5rem; font-weight:bold; padding:4px 8px; border-radius:4px; font-family:Orbitron;">${art.tag}</span>
@@ -74,7 +77,7 @@ function renderNews(container) {
                     <div style="padding:15px;">
                         <h3 style="font-size:0.9rem; margin:0; color:white; line-height:1.3;">${art.title}</h3>
                         <p style="font-size:0.75rem; color:var(--gray); margin-top:8px; line-height:1.4;">${art.desc}</p>
-                        <div style="margin-top:10px; color:var(--accent); font-size:0.6rem; font-weight:bold; text-transform:uppercase;">Lire l'article complet →</div>
+                        <div style="margin-top:10px; color:var(--accent); font-size:0.6rem; font-weight:bold; text-transform:uppercase;">Cliquer pour lire sur le site source →</div>
                     </div>
                 </div>
             `).join('')}
