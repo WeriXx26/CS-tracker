@@ -10,17 +10,17 @@ let favorites = JSON.parse(localStorage.getItem('cs2_favs')) || [];
 let currentPage = 'matches';
 
 /**
- * 2. NAVIGATION PRINCIPALE
+ * 2. NAVIGATION ET ONGLETS
  */
 function navigateTo(page) {
-    // On ferme toujours le détail quand on change d'onglet
+    // Fermer le détail si on change d'onglet
     closeDetail();
     
     currentPage = page;
     const container = document.getElementById('match-list');
     const subTabs = document.getElementById('sub-tabs');
 
-    // Mise à jour visuelle des onglets du haut
+    // Mise à jour visuelle de la navigation haute
     document.querySelectorAll('.nav-link').forEach(el => el.classList.remove('active'));
     const activeNav = document.getElementById('nav-' + page);
     if (activeNav) activeNav.classList.add('active');
@@ -28,18 +28,56 @@ function navigateTo(page) {
     if (page === 'matches') {
         if (subTabs) subTabs.style.display = 'flex';
         filterMatches('TOUS', document.querySelector('.tab'));
-    } else {
+    } 
+    else if (page === 'news') {
+        if (subTabs) subTabs.style.display = 'none';
+        renderNews(container);
+    } 
+    else if (page === 'settings') {
         if (subTabs) subTabs.style.display = 'none';
         container.innerHTML = `
             <div style="text-align:center; padding:50px; animation: fadeIn 0.5s;">
-                <h2 style="font-family:Orbitron; color:var(--accent); font-size:1rem;">BIENTÔT DISPONIBLE</h2>
-                <p style="color:var(--gray); font-size:0.8rem; margin-top:10px;">L'onglet ${page} est en cours de développement.</p>
+                <h2 style="font-family:Orbitron; color:var(--accent); font-size:1rem;">PROFIL & SETTINGS</h2>
+                <button onclick="localStorage.clear(); location.reload();" style="margin-top:20px; background:rgba(255,0,0,0.1); color:red; border:1px solid red; padding:15px; border-radius:12px; cursor:pointer; width:100%;">RÉINITIALISER L'APP</button>
             </div>`;
     }
 }
 
 /**
- * 3. LOGIQUE DES MATCHS
+ * 3. SYSTÈME DE NEWS
+ */
+function renderNews(container) {
+    const articles = [
+        {
+            title: "MAJ : Train fait son grand retour ?",
+            desc: "Des rumeurs persistantes et des fichiers cachés indiquent que Valve prépare le retour de la map mythique.",
+            img: "https://news.esea.net/content/images/2023/09/CS2_1.jpg"
+        },
+        {
+            title: "Vitality confirme sa domination",
+            desc: "Après une victoire écrasante hier, ZywOo et ses coéquipiers reprennent la tête du classement mondial.",
+            img: "https://img.vavel.com/b/Vitality_CS2.jpg"
+        }
+    ];
+
+    container.innerHTML = `
+        <div style="animation: fadeIn 0.5s ease-out;">
+            <h2 style="font-family:Orbitron; font-size:0.9rem; margin-bottom:20px; text-align:center; color:var(--accent);">DERNIÈRES ACTUS</h2>
+            ${articles.map(art => `
+                <div class="news-card">
+                    <img src="${art.img}">
+                    <div class="news-content">
+                        <h3>${art.title}</h3>
+                        <p>${art.desc}</p>
+                    </div>
+                </div>
+            `).join('')}
+        </div>
+    `;
+}
+
+/**
+ * 4. GESTION DES MATCHS
  */
 function filterMatches(type, element) {
     if (element) {
@@ -60,80 +98,56 @@ function renderList(list) {
     const container = document.getElementById('match-list');
     container.innerHTML = '';
 
-    if (list.length === 0) {
-        container.innerHTML = `<div style="text-align:center; color:gray; margin-top:30px;">Aucun match trouvé</div>`;
-        return;
-    }
-
     list.forEach(m => {
         container.innerHTML += `
-            <div class="match-card" onclick="openMatchDetail(${m.id})" style="cursor:pointer;">
-                <div style="display:flex; justify-content:space-between; align-items:center;">
-                    <div style="width:30%; text-align:center;">
-                        <img src="${m.logo1}" width="35">
-                        <div style="font-size:0.7rem; font-weight:bold; margin-top:5px;">${m.team1}</div>
-                    </div>
-                    <div style="text-align:center; flex:1;">
-                        <div style="font-size:1.3rem; font-weight:900; color:var(--accent);">${m.score}</div>
-                        <div style="font-size:0.6rem; color:var(--gray); margin-top:5px; letter-spacing:1px;">${m.status}</div>
-                    </div>
-                    <div style="width:30%; text-align:center;">
-                        <img src="${m.logo2}" width="35">
-                        <div style="font-size:0.7rem; font-weight:bold; margin-top:5px;">${m.team2}</div>
-                    </div>
+            <div class="match-card" onclick="openMatchDetail(${m.id})">
+                <div style="display:flex; justify-content:space-between; align-items:center; pointer-events:none;">
+                    <div style="width:30%; text-align:center;"><img src="${m.logo1}" width="35"><div style="font-size:0.7rem; font-weight:bold;">${m.team1}</div></div>
+                    <div style="text-align:center;"><div style="font-size:1.3rem; font-weight:900; color:var(--accent);">${m.score}</div><div style="font-size:0.5rem; color:var(--gray);">${m.status}</div></div>
+                    <div style="width:30%; text-align:center;"><img src="${m.logo2}" width="35"><div style="font-size:0.7rem; font-weight:bold;">${m.team2}</div></div>
                 </div>
             </div>`;
     });
 }
 
 /**
- * 4. VUE DÉTAILLÉE (STATS)
+ * 5. VUE DÉTAIL (STATS)
  */
 function openMatchDetail(id) {
     const m = matches.find(match => match.id === id);
     const view = document.getElementById('match-detail');
-    
     if (!m || !view) return;
-
-    // Simulation de statistiques pour le rendu visuel
-    const winRate = 62;
-    const adr = 78;
 
     view.innerHTML = `
         <div style="position:fixed; top:0; left:0; width:100%; height:100%; background:var(--bg); color:white; z-index:10000; padding:20px; overflow-y:auto; animation: fadeIn 0.3s;">
-            
             <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:30px;">
                 <button onclick="closeDetail()" style="background:rgba(255,180,0,0.1); color:var(--accent); border:1px solid var(--accent); padding:10px 15px; border-radius:8px; font-weight:bold; cursor:pointer;">← RETOUR</button>
-                <span style="font-family:'Orbitron'; font-size:0.7rem; letter-spacing:2px; color:var(--accent);">ANALYSE LIVE</span>
+                <span style="font-family:'Orbitron'; font-size:0.75rem; color:var(--accent); letter-spacing:2px;">LIVE ANALYTICS</span>
                 <div style="width:40px;"></div>
             </div>
 
-            <div style="background:var(--card); border-radius:20px; padding:30px 15px; text-align:center; border:1px solid rgba(255,255,255,0.05); margin-bottom:20px;">
+            <div style="background:var(--card); border-radius:20px; padding:30px 10px; text-align:center; border:1px solid rgba(255,255,255,0.05); margin-bottom:20px;">
                 <div style="display:flex; justify-content:space-around; align-items:center;">
-                    <div style="width:35%;"><img src="${m.logo1}" width="55"><h4 style="margin:10px 0 0 0;">${m.team1}</h4></div>
+                    <div style="width:35%;"><img src="${m.logo1}" width="55"><h4>${m.team1}</h4></div>
                     <div style="width:30%;"><div style="font-size:2.2rem; font-weight:900; color:var(--accent);">${m.score}</div><div style="font-size:0.6rem; color:var(--gray);">BO3</div></div>
-                    <div style="width:35%;"><img src="${m.logo2}" width="55"><h4 style="margin:10px 0 0 0;">${m.team2}</h4></div>
+                    <div style="width:35%;"><img src="${m.logo2}" width="55"><h4>${m.team2}</h4></div>
                 </div>
             </div>
 
             <div style="background:rgba(255,255,255,0.02); border-radius:15px; padding:20px; border:1px solid rgba(255,255,255,0.05);">
-                <h3 style="font-family:'Orbitron'; font-size:0.7rem; margin-bottom:20px; color:var(--gray);">PROBABILITÉS & IMPACT</h3>
-                
-                <div style="margin-bottom:25px;">
-                    <div style="display:flex; justify-content:space-between; font-size:0.7rem; margin-bottom:8px;"><span>Probabilité Victoire</span><span style="color:var(--accent);">${winRate}%</span></div>
-                    <div style="height:6px; background:rgba(255,255,255,0.1); border-radius:3px; overflow:hidden;"><div style="width:${winRate}%; height:100%; background:var(--accent);"></div></div>
+                <div style="margin-bottom:20px;">
+                    <div style="display:flex; justify-content:space-between; font-size:0.7rem; margin-bottom:8px;"><span>Probabilité Victoire</span><span style="color:var(--accent);">65%</span></div>
+                    <div style="height:6px; background:rgba(255,255,255,0.1); border-radius:3px; overflow:hidden;"><div style="width:65%; height:100%; background:var(--accent);"></div></div>
                 </div>
-
                 <div style="margin-bottom:10px;">
-                    <div style="display:flex; justify-content:space-between; font-size:0.7rem; margin-bottom:8px;"><span>Impact ADR</span><span style="color:var(--accent);">${adr}</span></div>
-                    <div style="height:6px; background:rgba(255,255,255,0.1); border-radius:3px; overflow:hidden;"><div style="width:${adr}%; height:100%; background:white; opacity:0.6;"></div></div>
+                    <div style="display:flex; justify-content:space-between; font-size:0.7rem; margin-bottom:8px;"><span>Team ADR</span><span style="color:var(--accent);">82.4</span></div>
+                    <div style="height:6px; background:rgba(255,255,255,0.1); border-radius:3px; overflow:hidden;"><div style="width:82%; height:100%; background:white; opacity:0.6;"></div></div>
                 </div>
             </div>
 
-            <button style="width:100%; margin-top:30px; padding:20px; background:#9146ff; color:white; border:none; border-radius:15px; font-weight:bold; font-family:'Orbitron'; cursor:pointer; font-size:0.8rem;">VOIR SUR TWITCH.TV</button>
-        </div>
-    `;
-
+            <button style="width:100%; margin-top:30px; padding:20px; background:#9146ff; color:white; border:none; border-radius:15px; font-weight:bold; font-family:'Orbitron'; cursor:pointer;">REGARDER SUR TWITCH</button>
+        </div>`;
+    
     view.style.display = 'block';
 }
 
@@ -142,5 +156,5 @@ function closeDetail() {
     if (view) view.style.display = 'none';
 }
 
-// Initialisation
+// Lancement
 window.onload = () => navigateTo('matches');
