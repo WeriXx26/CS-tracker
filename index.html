@@ -1,46 +1,51 @@
 <!DOCTYPE html>
 <html lang="fr">
 <head>
-    <link rel="stylesheet" href="style.css">
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
     <meta name="apple-mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
     <title>CS2 TRACKER PRO</title>
+    <!-- Polices Esport -->
     <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@700&family=Inter:wght@400;700&display=swap" rel="stylesheet">
+    <!-- Lien vers ton CSS -->
+    <link rel="stylesheet" href="style.css">
 </head>
 <body>
 
 <div class="smartphone-container">
     <header class="app-header">
-        <!-- Titre Centré -->
+        <!-- Titre de l'app centré -->
         <div class="brand-center">
             <h1>CS2 TRACKER</h1>
         </div>
 
-        <!-- Navigation Principale Centrée -->
+        <!-- Navigation Principale (News maintenant liée au JS) -->
         <nav class="main-nav">
             <div onclick="navigateTo('matches')" id="nav-matches" class="nav-link active">MATCHS</div>
             <div onclick="navigateTo('news')" id="nav-news" class="nav-link">ACTUS</div>
             <div onclick="navigateTo('settings')" id="nav-settings" class="nav-link">PROFIL</div>
         </nav>
         
-        <!-- Sous-onglets (uniquement pour les matchs) -->
+        <!-- Sous-onglets (uniquement visibles pour les matchs) -->
         <div class="tabs" id="sub-tabs">
             <div class="tab active" onclick="filterMatches('TOUS', this)">TOUS</div>
             <div class="tab" onclick="filterMatches('LIVE', this)">LIVE</div>
-            <div class="tab" onclick="filterMatches('FAV', this)">FAVORIS</div>
+            <div class="tab" onclick="filterMatches('FAVORIS', this)">FAVORIS</div>
         </div>
     </header>
 
+    <!-- ZONE CRUCIALE : Le container où tout s'affiche -->
     <main id="match-list" class="content-area">
-        <!-- Contenu injecté ici -->
+        <!-- Le JavaScript injectera les matchs ou les news ici -->
     </main>
 
-    <!-- Overlay de Détail -->
+    <!-- Overlay pour les détails de match (Stats) -->
     <div id="match-detail" class="detail-overlay"></div>
 </div>
-    <script src="script.js"></script>
+
+<!-- Lien vers ton JS (à placer impérativement avant la fermeture du body) -->
+<script src="script.js"></script>
 
 </body>
 </html>
