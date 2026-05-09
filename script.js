@@ -1,7 +1,7 @@
 /**
  * 1. CONFIGURATION SIMPLE
  */
-const PANDA_TOKEN = 'GOA-V3x_Qi2zV7-bZhurTmpB78ZojtXQDLpG23ApSgj8dSFzfRQ'; // <-- Mets ta clé PandaScore ici
+const PANDA_TOKEN = 'hyW11mB7JjyRHvjcqoZvmy1qvpuZbyhpuCqGIntAPWfjHlyq9ZM'; // <-- Mets ta clé PandaScore ici
 const PROXY = 'https://api.allorigins.win/raw?url='; // Proxy public sans configuration
 
 const API_MATCHS = 'https://api.pandascore.co/csgo/matches?sort=status&per_page=20';
