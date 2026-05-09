@@ -21,9 +21,11 @@ function navigateTo(page) {
     if (page === 'matches') {
         subTabs.style.display = 'flex';
         filterMatches('TOUS', document.querySelector('.tab'));
+
     } else if (page === 'news') {
-        subTabs.style.display = 'none';
-        renderNews(container);
+    subTabs.style.display = 'none';
+    renderNews(container); // Le container est passé à la fonction
+}
     } else {
         subTabs.style.display = 'none';
         container.innerHTML = `<div style="text-align:center;padding:50px;">PROFIL BIENTÔT DISPONIBLE</div>`;
