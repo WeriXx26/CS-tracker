@@ -11,16 +11,12 @@
 
 <div class="smartphone-container">
     <header class="app-header">
-        <div class="brand-center">
-            <h1>CS2 TRACKER</h1>
-        </div>
-
+        <div class="brand-center"><h1>CS2 TRACKER</h1></div>
         <nav class="main-nav">
             <div onclick="navigateTo('matches')" id="nav-matches" class="nav-link active">MATCHS</div>
             <div onclick="navigateTo('news')" id="nav-news" class="nav-link">ACTUS</div>
             <div onclick="navigateTo('settings')" id="nav-settings" class="nav-link">PROFIL</div>
         </nav>
-        
         <div class="tabs-container" id="sub-tabs">
             <div class="tab active" onclick="filterMatches('TOUS', this)">TOUS</div>
             <div class="tab" onclick="filterMatches('LIVE', this)">LIVE</div>
@@ -29,10 +25,7 @@
         </div>
     </header>
 
-    <main id="match-list" class="content-area">
-        <!-- Contenu dynamique -->
-    </main>
-
+    <main id="match-list" class="content-area"></main>
     <div id="match-detail" class="detail-overlay"></div>
 </div>
 
