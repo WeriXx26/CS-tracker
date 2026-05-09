@@ -17,11 +17,24 @@ let favorites = JSON.parse(localStorage.getItem('cs2_favs')) || ['Vitality', 'G2
 async function fetchData(url) {
     try {
         const fullUrl = PROXY + encodeURIComponent(url + '&token=' + PANDA_TOKEN);
-        const response = await fetch(fullUrl);
-        if (!response.ok) throw new Error();
+        
+        // On ajoute un signal d'abandon pour éviter le "canceled"
+        const response = await fetch(fullUrl, {
+            method: 'GET',
+            mode: 'cors', // Force le mode CORS
+            headers: {
+                'Accept': 'application/json'
+            }
+        });
+
+        if (!response.ok) {
+            console.error("Réponse réseau pas OK:", response.status);
+            return null;
+        }
+        
         return await response.json();
     } catch (e) {
-        console.error("Erreur API, vérifie ton Token ou le Proxy");
+        console.error("Erreur de récupération :", e);
         return null;
     }
 }
