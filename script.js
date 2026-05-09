@@ -1,67 +1,73 @@
 /**
- * 1. DONNÉES DE L'APPLICATION
+ * 1. DONNÉES
  */
 const matches = [
-    { id: 1, team1: "Vitality", logo1: "https://i.ibb.co/f4pC6qF/vitality.png", team2: "G2", logo2: "https://i.ibb.co/L5T4FqC/g2.png", league: "PGL MAJOR", status: "LIVE", score: "1 - 0" },
-    { id: 2, team1: "FaZe", logo1: "https://i.ibb.co/JqjXkM6/faze.png", team2: "NaVi", logo2: "https://i.ibb.co/BccC4W8/navi.png", league: "IEM KATOWICE", status: "UPCOMING", score: "0 - 0" }
+    { id: 1, team1: "Vitality", logo1: "https://i.ibb.co/f4pC6qF/vitality.png", team2: "G2", logo2: "https://i.ibb.co/L5T4FqC/g2.png", status: "LIVE", score: "1 - 0" },
+    { id: 2, team1: "FaZe", logo1: "https://i.ibb.co/JqjXkM6/faze.png", team2: "NaVi", logo2: "https://i.ibb.co/BccC4W8/navi.png", status: "UPCOMING", score: "0 - 0" }
 ];
 
-let favorites = JSON.parse(localStorage.getItem('cs2_favs')) || [];
-
 /**
- * 2. NAVIGATION PRINCIPALE
+ * 2. NAVIGATION (La clé pour l'onglet Actus)
  */
 function navigateTo(page) {
-    closeDetail();
+    console.log("Navigation demandée vers :", page);
+    
     const container = document.getElementById('match-list');
     const subTabs = document.getElementById('sub-tabs');
+    
+    if (!container) return;
 
-    // Update style des liens
+    // Gestion visuelle des onglets actifs
     document.querySelectorAll('.nav-link').forEach(el => el.classList.remove('active'));
-    const activeNav = document.getElementById('nav-' + page);
-    if (activeNav) activeNav.classList.add('active');
+    const currentNav = document.getElementById('nav-' + page);
+    if (currentNav) currentNav.classList.add('active');
+
+    // Nettoyage de la zone d'affichage
+    container.innerHTML = "";
+    closeDetail();
 
     if (page === 'matches') {
-        if (subTabs) subTabs.style.display = 'flex';
-        filterMatches('TOUS', document.querySelector('.tab'));
+        subTabs.style.display = 'flex';
+        renderList(matches);
     } 
     else if (page === 'news') {
-        if (subTabs) subTabs.style.display = 'none';
+        subTabs.style.display = 'none';
         renderNews(container);
     } 
     else if (page === 'settings') {
-        if (subTabs) subTabs.style.display = 'none';
+        subTabs.style.display = 'none';
         container.innerHTML = `
             <div style="text-align:center; padding:50px; animation: fadeIn 0.5s;">
-                <h2 style="font-family:Orbitron; color:var(--accent); font-size:1rem;">RÉGLAGES</h2>
-                <button onclick="localStorage.clear(); location.reload();" style="margin-top:20px; background:rgba(255,0,0,0.1); color:red; border:1px solid red; padding:15px; border-radius:12px; cursor:pointer; width:100%; font-weight:bold;">EFFACER LE CACHE</button>
+                <h2 style="font-family:Orbitron; color:var(--accent);">PROFIL</h2>
+                <p style="color:gray; font-size:0.8rem;">Paramètres du compte bientôt disponibles.</p>
             </div>`;
     }
 }
 
 /**
- * 3. SYSTÈME DE NEWS (L'onglet qui était vide)
+ * 3. SYSTÈME DE NEWS
  */
 function renderNews(container) {
+    console.log("Injection des news...");
     const articles = [
         {
-            title: "Le retour de Train ?",
-            desc: "Des rumeurs persistantes indiquent que Valve prépare le retour de la map mythique pour la prochaine saison.",
+            title: "MAJ : Train fait son retour ?",
+            desc: "Les rumeurs s'intensifient autour de la prochaine mise à jour majeure de Valve.",
             img: "https://news.esea.net/content/images/2023/09/CS2_1.jpg"
         },
         {
-            title: "Vitality en démonstration",
-            desc: "L'équipe française confirme sa forme actuelle en dominant le classement mondial HLTV ce mois-ci.",
+            title: "Vitality écrase la scène",
+            desc: "ZywOo une nouvelle fois élu MVP après une performance historique.",
             img: "https://img.vavel.com/b/Vitality_CS2.jpg"
         }
     ];
 
     container.innerHTML = `
         <div style="animation: fadeIn 0.5s ease-out;">
-            <h2 style="font-family:Orbitron; font-size:0.9rem; margin-bottom:20px; text-align:center; color:var(--accent); letter-spacing:2px;">ACTUALITÉS</h2>
+            <h2 style="font-family:Orbitron; font-size:0.9rem; margin-bottom:20px; text-align:center; color:var(--accent);">DERNIÈRES ACTUS</h2>
             ${articles.map(art => `
                 <div class="news-card">
-                    <img src="${art.img}">
+                    <img src="${art.img}" onerror="this.src='https://via.placeholder.com/400x200?text=CS2+News'">
                     <div class="news-content">
                         <h3>${art.title}</h3>
                         <p>${art.desc}</p>
@@ -73,39 +79,39 @@ function renderNews(container) {
 }
 
 /**
- * 4. LOGIQUE DES MATCHS
+ * 4. GESTION DES MATCHS
  */
-function filterMatches(type, element) {
-    if (element) {
-        document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
-        element.classList.add('active');
-    }
-    
-    let filtered = matches;
-    if (type === 'LIVE') filtered = matches.filter(m => m.status === 'LIVE');
-    if (type === 'FAVORIS') filtered = matches.filter(m => favorites.includes(m.team1) || favorites.includes(m.team2));
-
-    renderList(filtered);
-}
-
 function renderList(list) {
     const container = document.getElementById('match-list');
-    container.innerHTML = '';
-
     list.forEach(m => {
-        container.innerHTML += `
-            <div class="match-card" onclick="openMatchDetail(${m.id})">
-                <div style="display:flex; justify-content:space-between; align-items:center; pointer-events:none;">
-                    <div style="width:30%; text-align:center;"><img src="${m.logo1}" width="35"><div style="font-size:0.7rem; font-weight:bold; margin-top:5px;">${m.team1}</div></div>
-                    <div style="text-align:center; flex:1;"><div style="font-size:1.3rem; font-weight:900; color:var(--accent);">${m.score}</div><div style="font-size:0.5rem; color:var(--gray);">${m.status}</div></div>
-                    <div style="width:30%; text-align:center;"><img src="${m.logo2}" width="35"><div style="font-size:0.7rem; font-weight:bold; margin-top:5px;">${m.team2}</div></div>
-                </div>
+        const card = document.createElement('div');
+        card.className = 'match-card';
+        card.onclick = () => openMatchDetail(m.id);
+        card.innerHTML = `
+            <div style="display:flex; justify-content:space-between; align-items:center; pointer-events:none;">
+                <div style="width:30%; text-align:center;"><img src="${m.logo1}" width="35"><div>${m.team1}</div></div>
+                <div style="text-align:center;"><div style="font-size:1.3rem; font-weight:900; color:var(--accent);">${m.score}</div><div style="font-size:0.5rem; color:gray;">${m.status}</div></div>
+                <div style="width:30%; text-align:center;"><img src="${m.logo2}" width="35"><div>${m.team2}</div></div>
             </div>`;
+        container.appendChild(card);
     });
 }
 
+function filterMatches(type, element) {
+    document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+    element.classList.add('active');
+    
+    let filtered = matches;
+    if (type === 'LIVE') filtered = matches.filter(m => m.status === 'LIVE');
+    // On pourra ajouter les favoris ici plus tard
+    
+    const container = document.getElementById('match-list');
+    container.innerHTML = "";
+    renderList(filtered);
+}
+
 /**
- * 5. VUE DÉTAIL (STATS)
+ * 5. VUE DÉTAILLÉE
  */
 function openMatchDetail(id) {
     const m = matches.find(match => match.id === id);
@@ -113,35 +119,17 @@ function openMatchDetail(id) {
     if (!m || !view) return;
 
     view.innerHTML = `
-        <div style="position:fixed; top:0; left:0; width:100%; height:100%; background:var(--bg); color:white; z-index:10000; padding:20px; overflow-y:auto; animation: fadeIn 0.3s;">
-            <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:30px;">
-                <button onclick="closeDetail()" style="background:rgba(255,180,0,0.1); color:var(--accent); border:1px solid var(--accent); padding:10px 15px; border-radius:8px; font-weight:bold; cursor:pointer;">← RETOUR</button>
-                <span style="font-family:'Orbitron'; font-size:0.75rem; color:var(--accent); letter-spacing:2px;">DIRECT ANALYTICS</span>
-                <div style="width:40px;"></div>
-            </div>
-
-            <div style="background:var(--card); border-radius:20px; padding:30px 10px; text-align:center; border:1px solid rgba(255,255,255,0.05); margin-bottom:20px;">
-                <div style="display:flex; justify-content:space-around; align-items:center;">
-                    <div style="width:35%;"><img src="${m.logo1}" width="55"><h4>${m.team1}</h4></div>
-                    <div style="width:30%;"><div style="font-size:2.2rem; font-weight:900; color:var(--accent);">${m.score}</div><div style="font-size:0.6rem; color:var(--gray);">LIVE</div></div>
-                    <div style="width:35%;"><img src="${m.logo2}" width="55"><h4>${m.team2}</h4></div>
+        <div style="position:fixed; top:0; left:0; width:100%; height:100%; background:var(--bg); color:white; z-index:10000; padding:20px; overflow-y:auto;">
+            <button onclick="closeDetail()" style="background:var(--accent); color:black; border:none; padding:10px 20px; border-radius:8px; font-weight:bold; cursor:pointer;">← RETOUR</button>
+            <div style="text-align:center; margin-top:30px;">
+                <h2 style="font-family:Orbitron; color:var(--accent);">${m.team1} vs ${m.team2}</h2>
+                <div style="background:rgba(255,255,255,0.05); padding:20px; border-radius:15px; margin-top:20px;">
+                    <p style="font-size:0.8rem; color:gray;">STATS EN DIRECT</p>
+                    <div style="font-size:2rem; font-weight:bold; margin:10px 0;">${m.score}</div>
                 </div>
+                <button style="width:100%; margin-top:30px; padding:20px; background:#9146ff; color:white; border:none; border-radius:12px; font-weight:bold; font-family:Orbitron;">TWITCH LIVE</button>
             </div>
-
-            <div style="background:rgba(255,255,255,0.02); border-radius:15px; padding:20px; border:1px solid rgba(255,255,255,0.05);">
-                <div style="margin-bottom:20px;">
-                    <div style="display:flex; justify-content:space-between; font-size:0.7rem; margin-bottom:8px;"><span>Probabilité de victoire</span><span style="color:var(--accent);">65%</span></div>
-                    <div style="height:6px; background:rgba(255,255,255,0.1); border-radius:3px; overflow:hidden;"><div style="width:65%; height:100%; background:var(--accent);"></div></div>
-                </div>
-                <div style="margin-bottom:10px;">
-                    <div style="display:flex; justify-content:space-between; font-size:0.7rem; margin-bottom:8px;"><span>Impact ADR</span><span style="color:var(--accent);">84.2</span></div>
-                    <div style="height:6px; background:rgba(255,255,255,0.1); border-radius:3px; overflow:hidden;"><div style="width:84%; height:100%; background:white; opacity:0.6;"></div></div>
-                </div>
-            </div>
-
-            <button style="width:100%; margin-top:30px; padding:20px; background:#9146ff; color:white; border:none; border-radius:15px; font-weight:bold; font-family:'Orbitron'; cursor:pointer;">REGARDER SUR TWITCH</button>
         </div>`;
-    
     view.style.display = 'block';
 }
 
@@ -150,4 +138,5 @@ function closeDetail() {
     if (view) view.style.display = 'none';
 }
 
+// Lancement automatique
 window.onload = () => navigateTo('matches');
