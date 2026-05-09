@@ -1,3 +1,6 @@
+/**
+ * 1. DONNÉES STATIQUES (MATCHS)
+ */
 const matches = [
     { id: 1, team1: "Vitality", logo1: "https://i.ibb.co/f4pC6qF/vitality.png", team2: "G2", logo2: "https://i.ibb.co/L5T4FqC/g2.png", status: "LIVE", score: "1 - 0" },
     { id: 2, team1: "FaZe", logo1: "https://i.ibb.co/JqjXkM6/faze.png", team2: "NaVi", logo2: "https://i.ibb.co/BccC4W8/navi.png", status: "UPCOMING", score: "0 - 0" }
@@ -5,12 +8,15 @@ const matches = [
 
 let favorites = [];
 
+/**
+ * 2. NAVIGATION PRINCIPALE
+ */
 function navigateTo(page) {
     const container = document.getElementById('match-list');
     const subTabs = document.getElementById('sub-tabs');
     if (!container) return;
 
-    // UI Onglets hauts
+    // Mise à jour visuelle des onglets
     document.querySelectorAll('.nav-link').forEach(el => el.classList.remove('active'));
     const activeNav = document.getElementById('nav-' + page);
     if (activeNav) activeNav.classList.add('active');
@@ -21,17 +27,64 @@ function navigateTo(page) {
     if (page === 'matches') {
         subTabs.style.display = 'flex';
         filterMatches('TOUS', document.querySelector('.tab'));
-
     } else if (page === 'news') {
-    subTabs.style.display = 'none';
-    renderNews(container); // Le container est passé à la fonction
-}
+        subTabs.style.display = 'none';
+        renderNews(container); // Appel de la fonction API
     } else {
         subTabs.style.display = 'none';
-        container.innerHTML = `<div style="text-align:center;padding:50px;">PROFIL BIENTÔT DISPONIBLE</div>`;
+        container.innerHTML = `<div style="text-align:center;padding:50px;color:gray;">PROFIL BIENTÔT DISPONIBLE</div>`;
     }
 }
 
+/**
+ * 3. SYSTÈME DE NEWS (API TEMPS RÉEL)
+ */
+async function renderNews(container) {
+    // Affichage d'un loader pendant l'attente
+    container.innerHTML = `
+        <div style="text-align:center; padding:50px; color:var(--accent); animation: pulse 1.5s infinite;">
+            <div style="font-family:Orbitron; font-size:0.8rem; letter-spacing:2px;">SYNCHRONISATION DES FLUX...</div>
+        </div>`;
+
+    try {
+        // On utilise un flux RSS Esport converti en JSON
+        const rssUrl = 'https://www.team-aaa.com/rss/news.xml'; 
+        const response = await fetch(`https://api.rss2json.com/v1/api.json?rss_url=${encodeURIComponent(rssUrl)}`);
+        const data = await response.json();
+
+        if (data.status === 'ok') {
+            container.innerHTML = `
+                <div style="animation: fadeIn 0.5s ease-out;">
+                    <h2 style="font-family:Orbitron; font-size:0.9rem; margin-bottom:20px; text-align:center; color:var(--accent); letter-spacing:2px;">ACTUALITÉS TEMPS RÉEL</h2>
+                    ${data.items.slice(0, 10).map(art => `
+                        <div class="news-card" onclick="window.open('${art.link}', '_blank')" style="cursor:pointer; animation: fadeIn 0.4s;">
+                            <img src="${art.thumbnail || 'https://via.placeholder.com/400x200?text=CS2+Esport'}" onerror="this.src='https://via.placeholder.com/400x200?text=CS2+News'">
+                            <div class="news-content">
+                                <h3 style="font-size:0.85rem; line-height:1.3; margin:0;">${art.title}</h3>
+                                <div style="display:flex; justify-content:space-between; align-items:center; margin-top:10px;">
+                                    <span style="font-size:0.6rem; color:var(--accent); font-weight:bold;">TEAM-AAA</span>
+                                    <span style="font-size:0.6rem; color:var(--gray);">${art.pubDate.split(' ')[0]}</span>
+                                </div>
+                            </div>
+                        </div>
+                    `).join('')}
+                </div>
+            `;
+        } else {
+            throw new Error();
+        }
+    } catch (error) {
+        container.innerHTML = `
+            <div style="text-align:center; padding:50px;">
+                <p style="color:red; font-size:0.8rem;">Erreur de connexion aux serveurs de news.</p>
+                <button onclick="navigateTo('news')" style="background:transparent; border:1px solid var(--accent); color:var(--accent); padding:10px; border-radius:5px; margin-top:10px;">RÉESSAYER</button>
+            </div>`;
+    }
+}
+
+/**
+ * 4. GESTION DES MATCHS
+ */
 function filterMatches(type, element) {
     document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
     if (element) element.classList.add('active');
@@ -58,38 +111,9 @@ function renderList(list) {
     });
 }
 
-async function renderNews(container) {
-    container.innerHTML = `<div style="text-align:center; padding:50px; color:var(--accent);">CHARGEMENT DES NEWS...</div>`;
-
-    try {
-        // Utilisation d'un flux RSS Esport (via un convertisseur JSON gratuit)
-        const rssUrl = 'https://www.team-aaa.com/rss/news.xml'; 
-        const response = await fetch(`https://api.rss2json.com/v1/api.json?rss_url=${encodeURIComponent(rssUrl)}`);
-        const data = await response.json();
-
-        if (data.status === 'ok') {
-            container.innerHTML = `
-                <div style="animation: fadeIn 0.5s ease-out;">
-                    <h2 style="font-family:Orbitron; font-size:0.9rem; margin-bottom:20px; text-align:center; color:var(--accent); letter-spacing:2px;">ACTUALITÉS TEMPS RÉEL</h2>
-                    ${data.items.slice(0, 8).map(art => `
-                        <div class="news-card" onclick="window.open('${art.link}', '_blank')">
-                            <img src="${art.thumbnail || 'https://via.placeholder.com/400x200?text=CS2+Esport'}" onerror="this.src='https://via.placeholder.com/400x200?text=CS2+News'">
-                            <div class="news-content">
-                                <h3 style="font-size:0.85rem; line-height:1.2;">${art.title}</h3>
-                                <p style="font-size:0.7rem; margin-top:8px; opacity:0.8;">${art.pubDate.split(' ')[0]}</p>
-                            </div>
-                        </div>
-                    `).join('')}
-                </div>
-            `;
-        } else {
-            throw new Error();
-        }
-    } catch (error) {
-        container.innerHTML = `<div style="text-align:center; padding:50px; color:red;">Erreur de chargement des news. Réessayez plus tard.</div>`;
-    }
-}
-
+/**
+ * 5. VUE DÉTAIL
+ */
 function openMatchDetail(id) {
     const m = matches.find(match => match.id === id);
     const view = document.getElementById('match-detail');
@@ -108,4 +132,5 @@ function openMatchDetail(id) {
 
 function closeDetail() { document.getElementById('match-detail').style.display = 'none'; }
 
+// Init
 window.onload = () => navigateTo('matches');
