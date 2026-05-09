@@ -1,20 +1,17 @@
 /**
- * 1. DONNÉES DES MATCHS
+ * 1. CONFIGURATION API
+ * Remplace 'TA_CLE_PANDASCORE' par ton vrai token PandaScore
  */
-const matches = [
-    { id: 1, team1: "Vitality", logo1: "https://i.ibb.co/f4pC6qF/vitality.png", team2: "G2", logo2: "https://i.ibb.co/L5T4FqC/g2.png", status: "LIVE", score: "1 - 0" },
-    { id: 2, team1: "FaZe", logo1: "https://i.ibb.co/JqjXkM6/faze.png", team2: "NaVi", logo2: "https://i.ibb.co/BccC4W8/navi.png", status: "UPCOMING", score: "0 - 0" },
-    { id: 3, team1: "Mouz", logo1: "https://i.ibb.co/JqjXkM6/faze.png", team2: "Spirit", logo2: "https://i.ibb.co/BccC4W8/navi.png", status: "UPCOMING", score: "0 - 0" }
-];
+const PANDA_TOKEN = 'GOA-V3x_Qi2zV7-bZhurTmpB78ZojtXQDLpG23ApSgj8dSFzfRQ'; 
+const matchesContainer = 'match-list';
 
 /**
  * 2. NAVIGATION
  */
 function navigateTo(page) {
-    const container = document.getElementById('match-list');
+    const container = document.getElementById(matchesContainer);
     const subTabs = document.getElementById('sub-tabs');
-    if (!container) return;
-
+    
     document.querySelectorAll('.nav-link').forEach(el => el.classList.remove('active'));
     const activeNav = document.getElementById('nav-' + page);
     if (activeNav) activeNav.classList.add('active');
@@ -23,136 +20,89 @@ function navigateTo(page) {
     closeDetail();
 
     if (page === 'matches') {
-        if (subTabs) subTabs.style.display = 'flex';
-        filterMatches('TOUS', document.querySelector('.tab'));
+        subTabs.style.display = 'flex';
+        fetchLiveMatches(); // Appel API au chargement
     } else if (page === 'news') {
-        if (subTabs) subTabs.style.display = 'none';
-        renderNews(container);
-    } else {
-        if (subTabs) subTabs.style.display = 'none';
-        container.innerHTML = `<div style="text-align:center;padding:50px;color:gray;font-family:Orbitron;font-size:0.7rem;">PROFIL JOUEUR CONNECTÉ</div>`;
+        subTabs.style.display = 'none';
+        container.innerHTML = `<div style="text-align:center;padding:50px;color:gray;">ONGLET NEWS (SIMULÉ)</div>`;
     }
 }
 
 /**
- * 3. SYSTÈME DE NEWS (Avec liens cliquables)
+ * 3. APPEL API PANDASCORE (MATCHS RÉELS)
  */
-/**
- * 3. SYSTÈME DE NEWS (Correction des liens)
- */
-function renderNews(container) {
-    const realNews = [
-        {
-            title: "Mise à jour CS2 : Notes de patch officielles",
-            desc: "Découvrez les derniers changements apportés par Valve sur les cartes et le gameplay.",
-            img: "https://news.esea.net/content/images/2023/09/CS2_1.jpg",
-            tag: "OFFICIEL",
-            url: "https://www.counter-strike.net/news" // Lien direct vers le blog officiel
-        },
-        {
-            title: "Classement Mondial HLTV : Le Top 20",
-            desc: "Consultez l'évolution des meilleures équipes mondiales après les derniers tournois.",
-            img: "https://img.vavel.com/b/Vitality_CS2.jpg",
-            tag: "CLASSEMENT",
-            url: "https://www.hltv.org/ranking/teams" // Lien vers le classement (toujours actif)
-        },
-        {
-            title: "Calendrier des prochains Majors",
-            desc: "Toutes les dates et lieux des prochains tournois mondiaux annoncés par Valve.",
-            img: "https://prosettings.net/wp-content/uploads/cs2-guide.png",
-            tag: "EVENT",
-            url: "https://www.hltv.org/events" // Lien vers les événements (toujours actif)
+async function fetchLiveMatches() {
+    const container = document.getElementById(matchesContainer);
+    container.innerHTML = `<div style="text-align:center; padding:50px; color:var(--accent); font-family:Orbitron; font-size:0.7rem;">CHARGEMENT DES MATCHS PROS...</div>`;
+
+    try {
+        // On récupère les matchs "running" (en cours) et "upcoming" (à venir)
+        const response = await fetch(`https://api.pandascore.co/csgo/matches?token=${PANDA_TOKEN}&sort=status&per_page=10`);
+        const data = await response.json();
+
+        if (data.length > 0) {
+            renderMatches(data);
+        } else {
+            container.innerHTML = `<div style="text-align:center; padding:50px; color:gray;">Aucun match pro aujourd'hui.</div>`;
         }
-    ];
-
-    container.innerHTML = `
-        <div style="animation: fadeIn 0.5s ease-out;">
-            <h2 style="font-family:Orbitron; font-size:0.8rem; margin-bottom:20px; text-align:center; color:var(--accent); letter-spacing:2px;">ACTUALITÉS LIVE</h2>
-            ${realNews.map(art => `
-                <div class="news-card" onclick="window.location.href='${art.url}'" style="margin-bottom:20px; border:1px solid rgba(255,255,255,0.05); background:var(--card); border-radius:15px; overflow:hidden; cursor:pointer;">
-                    <div style="position:relative;">
-                        <img src="${art.img}" style="width:100%; height:160px; object-fit:cover;">
-                        <span style="position:absolute; top:10px; left:10px; background:var(--accent); color:black; font-size:0.5rem; font-weight:bold; padding:4px 8px; border-radius:4px; font-family:Orbitron;">${art.tag}</span>
-                    </div>
-                    <div style="padding:15px;">
-                        <h3 style="font-size:0.9rem; margin:0; color:white; line-height:1.3;">${art.title}</h3>
-                        <p style="font-size:0.75rem; color:var(--gray); margin-top:8px; line-height:1.4;">${art.desc}</p>
-                        <div style="margin-top:10px; color:var(--accent); font-size:0.6rem; font-weight:bold; text-transform:uppercase;">Cliquer pour lire sur le site source →</div>
-                    </div>
-                </div>
-            `).join('')}
-        </div>`;
+    } catch (error) {
+        console.error("Erreur API:", error);
+        container.innerHTML = `<div style="text-align:center; padding:50px; color:red;">Erreur de connexion à l'API PandaScore.</div>`;
+    }
 }
 
 /**
- * 4. LOGIQUE DES MATCHS
+ * 4. AFFICHAGE DES MATCHS
  */
-function filterMatches(type, element) {
-    const container = document.getElementById('match-list');
-    if (!container) return;
-    
-    document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
-    if (element) element.classList.add('active');
-    
+function renderMatches(list) {
+    const container = document.getElementById(matchesContainer);
     container.innerHTML = "";
-    let filtered = matches;
-    if (type === 'LIVE') filtered = matches.filter(m => m.status === 'LIVE');
-    
-    renderList(filtered);
-}
 
-function renderList(list) {
-    const container = document.getElementById('match-list');
     list.forEach(m => {
+        const team1 = m.opponents[0]?.opponent || { name: "TBD", image_url: "https://via.placeholder.com/50" };
+        const team2 = m.opponents[1]?.opponent || { name: "TBD", image_url: "https://via.placeholder.com/50" };
+        
+        // Gestion du score en direct
+        const score1 = m.results[0]?.score || 0;
+        const score2 = m.results[1]?.score || 0;
+        const isLive = m.status === "running";
+
         container.innerHTML += `
-            <div class="match-card" onclick="openMatchDetail(${m.id})" style="animation: fadeIn 0.3s; cursor:pointer;">
+            <div class="match-card" onclick="openMatchDetail('${m.id}')" style="border-left: 4px solid ${isLive ? 'var(--live)' : 'transparent'};">
+                <div style="font-size:0.5rem; color:var(--gray); margin-bottom:10px; text-transform:uppercase; letter-spacing:1px;">
+                    ${m.league.name} - ${m.serie.full_name}
+                </div>
                 <div style="display:flex; justify-content:space-between; align-items:center;">
-                    <div style="width:30%; text-align:center;"><img src="${m.logo1}" width="35"><div style="font-size:0.7rem;margin-top:5px;">${m.team1}</div></div>
-                    <div style="text-align:center; flex:1;"><div style="font-size:1.6rem; font-weight:900; color:var(--accent);">${m.score}</div><div style="font-size:0.55rem; color:var(--gray); letter-spacing:1px;">${m.status}</div></div>
-                    <div style="width:30%; text-align:center;"><img src="${m.logo2}" width="35"><div style="font-size:0.7rem;margin-top:5px;">${m.team2}</div></div>
+                    <div style="width:35%; text-align:center;">
+                        <img src="${team1.image_url || 'https://via.placeholder.com/50'}" width="35" style="filter: drop-shadow(0 0 5px rgba(0,0,0,0.5));">
+                        <div style="font-size:0.7rem; font-weight:bold; margin-top:5px;">${team1.name}</div>
+                    </div>
+                    
+                    <div style="text-align:center; flex:1;">
+                        <div style="font-size:1.4rem; font-weight:900; color:${isLive ? 'var(--live)' : 'var(--accent)'};">
+                            ${score1} - ${score2}
+                        </div>
+                        <div style="font-size:0.5rem; background:${isLive ? 'red' : '#333'}; color:white; display:inline-block; padding:2px 6px; border-radius:3px;">
+                            ${isLive ? 'LIVE' : 'À VENIR'}
+                        </div>
+                    </div>
+
+                    <div style="width:35%; text-align:center;">
+                        <img src="${team2.image_url || 'https://via.placeholder.com/50'}" width="35" style="filter: drop-shadow(0 0 5px rgba(0,0,0,0.5));">
+                        <div style="font-size:0.7rem; font-weight:bold; margin-top:5px;">${team2.name}</div>
+                    </div>
                 </div>
             </div>`;
     });
 }
 
-/**
- * 5. VUE DÉTAIL (STATS)
- */
 function openMatchDetail(id) {
-    const m = matches.find(match => match.id === id);
-    const view = document.getElementById('match-detail');
-    if (!m || !view) return;
-
-    view.innerHTML = `
-        <div style="position:fixed; top:0; left:0; width:100%; height:100%; background:var(--bg); color:white; z-index:10000; padding:20px; overflow-y:auto; animation: fadeIn 0.3s;">
-            <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:30px;">
-                <button onclick="closeDetail()" style="background:rgba(255,180,0,0.1); color:var(--accent); border:1px solid var(--accent); padding:10px 15px; border-radius:8px; font-weight:bold; cursor:pointer;">← RETOUR</button>
-                <span style="font-family:'Orbitron'; font-size:0.75rem; color:var(--accent); letter-spacing:2px;">STATISTIQUES</span>
-                <div style="width:40px;"></div>
-            </div>
-
-            <div style="background:var(--card); border-radius:20px; padding:30px 10px; text-align:center; border:1px solid rgba(255,255,255,0.05); margin-bottom:20px;">
-                <div style="display:flex; justify-content:space-around; align-items:center;">
-                    <div style="width:35%; text-align:center;"><img src="${m.logo1}" width="60"><h4>${m.team1}</h4></div>
-                    <div style="width:30%;"><div style="font-size:2.5rem; font-weight:900; color:var(--accent);">${m.score}</div><div style="font-size:0.6rem; color:var(--gray);">BEST OF 3</div></div>
-                    <div style="width:35%; text-align:center;"><img src="${m.logo2}" width="60"><h4>${m.team2}</h4></div>
-                </div>
-            </div>
-
-            <div style="background:rgba(255,255,255,0.02); border-radius:15px; padding:20px; border:1px solid rgba(255,255,255,0.05);">
-                <div style="margin-bottom:20px;">
-                    <div style="display:flex; justify-content:space-between; font-size:0.7rem; margin-bottom:8px;"><span>Probabilité Victoire</span><span style="color:var(--accent);">62%</span></div>
-                    <div style="height:6px; background:rgba(255,255,255,0.1); border-radius:3px; overflow:hidden;"><div style="width:62%; height:100%; background:var(--accent);"></div></div>
-                </div>
-            </div>
-
-            <button style="width:100%; margin-top:30px; padding:20px; background:#9146ff; color:white; border:none; border-radius:15px; font-weight:bold; font-family:'Orbitron'; cursor:pointer;">VOIR SUR TWITCH</button>
-        </div>`;
-    view.style.display = 'block';
+    // On pourra enrichir cette partie avec les stats spécifiques du match via l'ID
+    alert("Détails du match ID: " + id);
 }
 
-function closeDetail() { 
-    document.getElementById('match-detail').style.display = 'none'; 
+function closeDetail() {
+    document.getElementById('match-detail').style.display = 'none';
 }
 
 window.onload = () => navigateTo('matches');
