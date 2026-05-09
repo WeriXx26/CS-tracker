@@ -15,7 +15,6 @@ function navigateTo(page) {
     const subTabs = document.getElementById('sub-tabs');
     if (!container) return;
 
-    // UI Onglets
     document.querySelectorAll('.nav-link').forEach(el => el.classList.remove('active'));
     const activeNav = document.getElementById('nav-' + page);
     if (activeNav) activeNav.classList.add('active');
@@ -36,28 +35,30 @@ function navigateTo(page) {
 }
 
 /**
- * 3. SYSTÈME DE NEWS (Générateur Dynamique Garanti sans Erreur)
+ * 3. SYSTÈME DE NEWS (Avec liens cliquables)
  */
 function renderNews(container) {
-    // Liste de news "fresques" pour simuler l'API sans les bugs de connexion
     const realNews = [
         {
-            title: "Mise à jour CS2 : Le retour de Train confirmé ?",
-            desc: "Les derniers fichiers extraits de la mise à jour de ce matin montrent des textures retravaillées pour la map légendaire.",
+            title: "Mise à jour CS2 : Le retour de Train ?",
+            desc: "Les derniers fichiers extraits montrent des textures retravaillées pour la map légendaire.",
             img: "https://news.esea.net/content/images/2023/09/CS2_1.jpg",
-            tag: "OFFICIEL"
+            tag: "OFFICIEL",
+            url: "https://www.counter-strike.net/news"
         },
         {
             title: "Vitality : ZywOo prolonge son contrat",
-            desc: "L'organisation française vient d'annoncer que son joueur star restera jusqu'en 2027.",
+            desc: "L'organisation française annonce que son joueur star restera jusqu'en 2027.",
             img: "https://img.vavel.com/b/Vitality_CS2.jpg",
-            tag: "TRANSFERT"
+            tag: "TRANSFERT",
+            url: "https://www.hltv.org/news"
         },
         {
             title: "Major 2026 : Shanghaï se prépare",
-            desc: "Les travaux de l'arène principale avancent. Le prochain Major s'annonce comme le plus grand de l'histoire.",
+            desc: "Les travaux de l'arène avancent. Le prochain Major s'annonce historique.",
             img: "https://prosettings.net/wp-content/uploads/cs2-guide.png",
-            tag: "EVENT"
+            tag: "EVENT",
+            url: "https://www.hltv.org/events"
         }
     ];
 
@@ -65,7 +66,7 @@ function renderNews(container) {
         <div style="animation: fadeIn 0.5s ease-out;">
             <h2 style="font-family:Orbitron; font-size:0.8rem; margin-bottom:20px; text-align:center; color:var(--accent); letter-spacing:2px;">ACTUALITÉS LIVE</h2>
             ${realNews.map(art => `
-                <div class="news-card" style="margin-bottom:20px; border:1px solid rgba(255,255,255,0.05); background:var(--card); border-radius:15px; overflow:hidden;">
+                <div class="news-card" onclick="window.open('${art.url}', '_blank')" style="margin-bottom:20px; border:1px solid rgba(255,255,255,0.05); background:var(--card); border-radius:15px; overflow:hidden; cursor:pointer;">
                     <div style="position:relative;">
                         <img src="${art.img}" style="width:100%; height:160px; object-fit:cover;">
                         <span style="position:absolute; top:10px; left:10px; background:var(--accent); color:black; font-size:0.5rem; font-weight:bold; padding:4px 8px; border-radius:4px; font-family:Orbitron;">${art.tag}</span>
@@ -73,6 +74,7 @@ function renderNews(container) {
                     <div style="padding:15px;">
                         <h3 style="font-size:0.9rem; margin:0; color:white; line-height:1.3;">${art.title}</h3>
                         <p style="font-size:0.75rem; color:var(--gray); margin-top:8px; line-height:1.4;">${art.desc}</p>
+                        <div style="margin-top:10px; color:var(--accent); font-size:0.6rem; font-weight:bold; text-transform:uppercase;">Lire l'article complet →</div>
                     </div>
                 </div>
             `).join('')}
@@ -100,7 +102,7 @@ function renderList(list) {
     const container = document.getElementById('match-list');
     list.forEach(m => {
         container.innerHTML += `
-            <div class="match-card" onclick="openMatchDetail(${m.id})" style="animation: fadeIn 0.3s;">
+            <div class="match-card" onclick="openMatchDetail(${m.id})" style="animation: fadeIn 0.3s; cursor:pointer;">
                 <div style="display:flex; justify-content:space-between; align-items:center;">
                     <div style="width:30%; text-align:center;"><img src="${m.logo1}" width="35"><div style="font-size:0.7rem;margin-top:5px;">${m.team1}</div></div>
                     <div style="text-align:center; flex:1;"><div style="font-size:1.6rem; font-weight:900; color:var(--accent);">${m.score}</div><div style="font-size:0.55rem; color:var(--gray); letter-spacing:1px;">${m.status}</div></div>
@@ -138,10 +140,6 @@ function openMatchDetail(id) {
                 <div style="margin-bottom:20px;">
                     <div style="display:flex; justify-content:space-between; font-size:0.7rem; margin-bottom:8px;"><span>Probabilité Victoire</span><span style="color:var(--accent);">62%</span></div>
                     <div style="height:6px; background:rgba(255,255,255,0.1); border-radius:3px; overflow:hidden;"><div style="width:62%; height:100%; background:var(--accent);"></div></div>
-                </div>
-                <div style="margin-bottom:10px;">
-                    <div style="display:flex; justify-content:space-between; font-size:0.7rem; margin-bottom:8px;"><span>Impact ADR</span><span style="color:var(--accent);">84.2</span></div>
-                    <div style="height:6px; background:rgba(255,255,255,0.1); border-radius:3px; overflow:hidden;"><div style="width:84%; height:100%; background:white; opacity:0.6;"></div></div>
                 </div>
             </div>
 
