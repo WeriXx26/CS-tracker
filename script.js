@@ -6,10 +6,7 @@ const API_MATCHS = 'https://api.pandascore.co/csgo/matches?sort=status&per_page=
 const API_TEAMS_TOP100 = 'https://api.pandascore.co/csgo/teams?sort=-videogame_score&per_page=100';
 
 // Liste de proxies (si l'un tombe, l'autre prend le relais)
-const PROXIES = [
-    'https://api.allorigins.win/raw?url=',
-    'https://corsproxy.io/?',
-    'https://thingproxy.freeboard.io/fetch/'
+const PROXIES = 'https://proxy-cs2.vercel.app/'
 ];
 
 let currentMatches = [];
