@@ -66,38 +66,32 @@ function navigateTo(page) {
 function renderMatchList(list) {
     const container = document.getElementById('match-list');
     if (!list || list.length === 0) {
-        container.innerHTML = `<div style="text-align:center;padding:20px;">Aucun match en direct sur HLTV.</div>`;
+        container.innerHTML = `<div style="text-align:center;padding:20px;color:red;">HLTV est inaccessible (Blocage 403).</div>`;
         return;
     }
+
     container.innerHTML = list.map(m => {
+        const isLive = m.status === 'running';
         const t1 = m.opponents[0].opponent;
         const t2 = m.opponents[1].opponent;
-        const isLive = m.status === 'running';
-        
-        // Correction des URLs HLTV si elles sont incomplètes
-        const fixImg = (url) => {
-            if (!url) return DEFAULT_LOGO;
-            if (url.startsWith('/')) return 'https://www.hltv.org' + url;
-            return url;
-        };
 
         return `
             <div class="match-card">
-                <div style="display:flex;justify-content:space-between;font-size:0.5rem;color:gray;margin-bottom:8px;">
-                    <span>${isLive ? '<b style="color:#ff4444;animation:blink 1s infinite;">● LIVE</b>' : m.begin_at}</span>
-                    <span>${m.league.name}</span>
+                <div style="display:flex;justify-content:space-between;font-size:0.55rem;font-family:Orbitron;color:#888;margin-bottom:10px;">
+                    <span>${isLive ? '<b class="live-badge">● LIVE</b>' : m.begin_at}</span>
+                    <span style="max-width:60%;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">${m.league.name}</span>
                 </div>
                 <div style="display:flex;justify-content:space-between;align-items:center;">
                     <div style="width:35%;text-align:center;">
-                        <img src="${fixImg(t1.image_url)}" width="30" onerror="this.src='${DEFAULT_LOGO}'">
-                        <div style="font-size:0.65rem;font-weight:bold;margin-top:4px;">${t1.name}</div>
+                        <img src="${t1.image_url || DEFAULT_LOGO}" width="32" onerror="this.src='${DEFAULT_LOGO}'">
+                        <div style="font-size:0.65rem;font-weight:bold;margin-top:5px;">${t1.name}</div>
                     </div>
-                    <div style="font-size:1.3rem;font-weight:900;color:${isLive ? '#ffb400' : '#fff'};">
+                    <div style="font-size:1.4rem;font-weight:900;color:${isLive ? '#ffb400' : '#fff'};">
                         ${m.results[0].score} - ${m.results[1].score}
                     </div>
                     <div style="width:35%;text-align:center;">
-                        <img src="${fixImg(t2.image_url)}" width="30" onerror="this.src='${DEFAULT_LOGO}'">
-                        <div style="font-size:0.65rem;font-weight:bold;margin-top:4px;">${t2.name}</div>
+                        <img src="${t2.image_url || DEFAULT_LOGO}" width="32" onerror="this.src='${DEFAULT_LOGO}'">
+                        <div style="font-size:0.65rem;font-weight:bold;margin-top:5px;">${t2.name}</div>
                     </div>
                 </div>
             </div>`;
