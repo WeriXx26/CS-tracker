@@ -1,5 +1,5 @@
 // Remplace bien cette URL par ton URL Railway actuelle
-const API_URL = 'https://server-production-9224.up.railway.app 
+const API_URL = 'https://server-production-9224.up.railway.app';
 const DEFAULT_LOGO = 'https://raw.githubusercontent.com/werixx26/werixx26.github.io/main/cs2-logo.png';
 
 let currentMatches = [];
