@@ -2,7 +2,7 @@
  * 1. CONFIGURATION
  * UTILISE TON URL RAILWAY ICI (sans le slash à la fin)
  */
-const API_URL = 'https://server-production-9224.up.railway.app/'; 
+const API_URL = 'https://server-production-9224.up.railway.app'; 
 
 let currentMatches = [];
 let allTeams = [];
