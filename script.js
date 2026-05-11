@@ -3,23 +3,25 @@
  */
 const PANDA_TOKEN = 'hyW11mB7JjyRHvjcqoZvmy1qvpuZbyhpuCqGIntAPWfjHlyq9ZM'; 
 const PROXY = 'https://corsproxy.io/?'; 
-// On trie par statut (running d'abord) puis par date de début
-const API_BASE = 'https://api.pandascore.co/csgo/matches?sort=status,-begin_at';
+// On demande tous les matchs CS (CSGO + CS2) triés par statut (LIVE en premier) puis par date
+const API_BASE = 'https://api.pandascore.co/cs/matches?sort=status,-begin_at';
 
 let currentMatches = [];
 let allTeams = [];
 let favorites = JSON.parse(localStorage.getItem('cs2_favs')) || [];
-let currentPage = 1;
-let currentTab = 'TOUS';
 
 /**
- * 2. NAVIGATION & RECHERCHE
+ * 2. NAVIGATION (Correction surbrillance & News)
  */
 function navigateTo(page) {
     const container = document.getElementById('match-list');
     const searchWrapper = document.getElementById('search-wrapper');
     const subTabs = document.getElementById('sub-tabs');
     
+    // Correction de la surbrillance des onglets
+    document.querySelectorAll('.nav-link').forEach(l => l.classList.remove('active'));
+    document.getElementById('nav-' + page).classList.add('active');
+
     container.innerHTML = "";
     if (page === 'matches') {
         searchWrapper.style.display = 'block';
@@ -28,47 +30,42 @@ function navigateTo(page) {
     } else {
         searchWrapper.style.display = 'none';
         subTabs.style.display = 'none';
-        if(page === 'news') renderNews(container);
+        container.innerHTML = `
+            <div class="match-card" onclick="window.open('https://www.hltv.org', '_blank')" style="margin-top:20px; text-align:center; padding:30px;">
+                <h3 style="font-family:Orbitron; color:#ffb400;">HLTV NEWS</h3>
+                <p style="font-size:0.7rem; color:gray; margin-top:10px;">Consulter les dernières actualités mondiales.</p>
+            </div>`;
     }
-}
-
-function handleSearch() {
-    const query = document.getElementById('global-search').value.toLowerCase();
-    const filtered = currentMatches.filter(m => {
-        const team1 = m.opponents[0]?.opponent.name.toLowerCase() || "";
-        const team2 = m.opponents[1]?.opponent.name.toLowerCase() || "";
-        const league = m.league.name.toLowerCase();
-        return team1.includes(query) || team2.includes(query) || league.includes(query);
-    });
-    renderMatchList(filtered, false);
 }
 
 /**
- * 3. LOGIQUE MATCHS (AVEC PAGINATION)
+ * 3. LOGIQUE MATCHS & PGL ASTANA
  */
 async function fetchAndRenderMatches(isNew = true) {
-    if(isNew) {
-        currentPage = 1;
-        currentMatches = [];
-    }
-    
     const container = document.getElementById('match-list');
     if(isNew) container.innerHTML = `<div class="loader">SYNCING...</div>`;
 
-    const url = `${API_BASE}&page=${currentPage}&per_page=20&token=${PANDA_TOKEN}`;
-    const response = await fetch(PROXY + encodeURIComponent(url));
-    const data = await response.json();
-
-    if (data && Array.isArray(data)) {
-        currentMatches = isNew ? data : [...currentMatches, ...data];
-        renderMatchList(currentMatches, true);
+    const url = `${API_BASE}&per_page=50&token=${PANDA_TOKEN}`; // On passe à 50 pour être sûr de capter PGL
+    try {
+        const response = await fetch(PROXY + encodeURIComponent(url));
+        const data = await response.json();
+        if (data && Array.isArray(data)) {
+            currentMatches = data;
+            renderMatchList(currentMatches);
+        }
+    } catch (e) {
+        container.innerHTML = `<div style="color:red; text-align:center;">Erreur API</div>`;
     }
 }
 
-function renderMatchList(list, showLoadMore) {
+function renderMatchList(list) {
     const container = document.getElementById('match-list');
-    
-    const html = list.map(m => {
+    if (!list || list.length === 0) {
+        container.innerHTML = `<div style="text-align:center; padding:50px; color:gray;">Aucun match trouvé.</div>`;
+        return;
+    }
+
+    container.innerHTML = list.map(m => {
         const t1 = m.opponents[0]?.opponent || { name: "TBD", image_url: "https://via.placeholder.com/30" };
         const t2 = m.opponents[1]?.opponent || { name: "TBD", image_url: "https://via.placeholder.com/30" };
         const isLive = m.status === 'running';
@@ -77,61 +74,51 @@ function renderMatchList(list, showLoadMore) {
 
         return `
             <div class="match-card" onclick="openMatchDetail('${m.id}')" style="border-left: 3px solid ${isLive ? '#ff4444' : '#333'}">
-                <div style="text-align:center; font-size:0.5rem; font-family:Orbitron; margin-bottom:10px;">
-                    ${isLive ? '<span class="live-badge">● LIVE</span>' : '<span style="color:gray;">'+time+'</span>'}
-                    <span style="color:gray; margin-left:10px;">${m.league.name}</span>
+                <div style="display:flex; justify-content:space-between; margin-bottom:10px; font-size:0.5rem; font-family:Orbitron; color:gray;">
+                    <span>${isLive ? '<b class="live-badge">● LIVE</b>' : time}</span>
+                    <span style="text-transform:uppercase;">${m.league.name}</span>
                 </div>
                 <div style="display:flex; justify-content:space-between; align-items:center;">
                     <div style="width:35%; text-align:center;">
-                        <img src="${t1.image_url}" width="30">
+                        <img src="${t1.image_url}" width="25" onerror="this.src='https://via.placeholder.com/30'">
                         <div style="font-size:0.6rem; margin-top:5px;">${t1.name}</div>
                     </div>
-                    <div style="font-size:1.2rem; font-weight:900;">${m.results[0]?.score} - ${m.results[1]?.score}</div>
+                    <div style="font-size:1.1rem; font-weight:900;">${m.results[0]?.score} - ${m.results[1]?.score}</div>
                     <div style="width:35%; text-align:center;">
-                        <img src="${t2.image_url}" width="30">
+                        <img src="${t2.image_url}" width="25" onerror="this.src='https://via.placeholder.com/30'">
                         <div style="font-size:0.6rem; margin-top:5px;">${t2.name}</div>
                     </div>
                 </div>
             </div>`;
     }).join('');
-
-    container.innerHTML = html;
-
-    if (showLoadMore && list.length >= 20) {
-        container.innerHTML += `
-            <button onclick="loadMore()" style="width:100%; padding:15px; background:#222; color:white; border:none; border-radius:10px; font-family:Orbitron; margin-top:10px;">
-                VOIR PLUS DE MATCHS
-            </button>`;
-    }
-}
-
-function loadMore() {
-    currentPage++;
-    fetchAndRenderMatches(false);
 }
 
 /**
- * 4. LOGIQUE ÉQUIPES (TOP 100)
+ * 4. ÉQUIPES & FAVORIS (Correction Affichage)
  */
 async function fetchAndRenderTeams() {
     const container = document.getElementById('match-list');
     container.innerHTML = `<div class="loader">SYNCING TEAMS...</div>`;
 
     if (allTeams.length === 0) {
-        const url = `https://api.pandascore.co/csgo/teams?sort=-videogame_score&per_page=100&token=${PANDA_TOKEN}`;
+        const url = `https://api.pandascore.co/cs/teams?sort=-videogame_score&per_page=50&token=${PANDA_TOKEN}`;
         const response = await fetch(PROXY + encodeURIComponent(url));
         allTeams = await response.json();
     }
 
+    renderTeamGrid(allTeams);
+}
+
+function renderTeamGrid(list) {
+    const container = document.getElementById('match-list');
     container.innerHTML = `<div class="teams-grid">
-        ${allTeams.map((team, index) => {
+        ${list.map((team, index) => {
             const isFav = favorites.includes(team.name);
             return `
-                <div class="match-card" style="text-align:center;">
-                    <span style="font-size:0.5rem; color:gray;">#${index+1}</span>
-                    <img src="${team.image_url}" style="width:40px; height:40px; object-fit:contain; margin:10px auto;">
-                    <div style="font-size:0.6rem; font-weight:bold;">${team.name}</div>
-                    <button onclick="toggleFav('${team.name}')" style="background:${isFav ? '#ffb400' : '#333'}; color:${isFav ? 'black' : 'white'};">
+                <div class="match-card" style="text-align:center; padding:10px;">
+                    <img src="${team.image_url}" style="width:35px; height:35px; object-fit:contain; margin-bottom:5px;">
+                    <div style="font-size:0.6rem; font-weight:bold; overflow:hidden;">${team.name}</div>
+                    <button onclick="toggleFav('${team.name}')" style="margin-top:8px; border:none; border-radius:5px; width:100%; padding:5px; font-size:0.5rem; font-weight:bold; background:${isFav ? '#ffb400' : '#222'}; color:${isFav ? '#000' : '#fff'};">
                         ${isFav ? 'SUIVI' : 'SUIVRE'}
                     </button>
                 </div>`;
@@ -139,38 +126,64 @@ async function fetchAndRenderTeams() {
     </div>`;
 }
 
-/**
- * 5. FILTRES & HELPERS
- */
 function filterMatches(type, element) {
     document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
     element.classList.add('active');
-    currentTab = type;
     
     if(type === 'EQUIPES') fetchAndRenderTeams();
     else if(type === 'FAVORIS') {
-        const favs = currentMatches.filter(m => favorites.includes(m.opponents[0]?.opponent.name) || favorites.includes(m.opponents[1]?.opponent.name));
-        renderMatchList(favs, false);
-    } else fetchAndRenderMatches(true);
+        const favMatches = currentMatches.filter(m => 
+            favorites.includes(m.opponents[0]?.opponent.name) || 
+            favorites.includes(m.opponents[1]?.opponent.name)
+        );
+        renderMatchList(favMatches);
+    } else {
+        fetchAndRenderMatches(true);
+    }
 }
 
 function toggleFav(name) {
+    event.stopPropagation(); // Empêche d'ouvrir les détails en cliquant sur le bouton
     favorites.includes(name) ? favorites = favorites.filter(f => f !== name) : favorites.push(name);
     localStorage.setItem('cs2_favs', JSON.stringify(favorites));
-    fetchAndRenderTeams();
+    renderTeamGrid(allTeams);
 }
 
-function renderNews(c) {
-    c.innerHTML = `<div class="match-card" onclick="window.open('https://www.hltv.org')"><h3>ACTUS HLTV</h3><p>Voir le site officiel</p></div>`;
-}
-
+/**
+ * 5. DÉTAILS DU MATCH (Correction affichage complet)
+ */
 function openMatchDetail(id) {
+    const match = currentMatches.find(m => m.id == id);
     const detail = document.getElementById('match-detail');
+    if(!match) return;
+
     detail.style.display = 'block';
-    detail.innerHTML = `<div style="padding:20px; text-align:center;">
-        <button onclick="document.getElementById('match-detail').style.display='none'">RETOUR</button>
-        <h2>MATCH ID: ${id}</h2>
-    </div>`;
+    detail.innerHTML = `
+        <div style="padding:20px; background:#000; height:100vh; text-align:center;">
+            <button onclick="document.getElementById('match-detail').style.display='none'" style="background:#ffb400; border:none; padding:10px 20px; border-radius:10px; font-weight:bold; font-family:Orbitron; cursor:pointer;">RETOUR</button>
+            
+            <h3 style="margin-top:30px; color:#ffb400; font-family:Orbitron; font-size:0.8rem;">${match.league.name}</h3>
+            <p style="color:gray; font-size:0.6rem;">${match.serie.full_name}</p>
+
+            <div style="display:flex; justify-content:space-around; align-items:center; margin-top:40px;">
+                <div>
+                    <img src="${match.opponents[0].opponent.image_url}" width="60">
+                    <div style="font-weight:bold; margin-top:10px;">${match.opponents[0].opponent.name}</div>
+                </div>
+                <div style="font-size:2rem; font-weight:900;">${match.results[0].score} : ${match.results[1].score}</div>
+                <div>
+                    <img src="${match.opponents[1].opponent.image_url}" width="60">
+                    <div style="font-weight:bold; margin-top:10px;">${match.opponents[1].opponent.name}</div>
+                </div>
+            </div>
+
+            <div style="margin-top:40px; background:#111; padding:20px; border-radius:15px; text-align:left;">
+                <p style="font-size:0.7rem;"><b>Format:</b> BO${match.number_of_games}</p>
+                <p style="font-size:0.7rem; margin-top:5px;"><b>Status:</b> ${match.status.toUpperCase()}</p>
+                <p style="font-size:0.7rem; margin-top:5px;"><b>Date:</b> ${new Date(match.begin_at).toLocaleString()}</p>
+            </div>
+        </div>`;
 }
 
+// Lancement
 window.onload = () => navigateTo('matches');
