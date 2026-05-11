@@ -1,35 +1,43 @@
-const PANDA_TOKEN = 'hyW11mB7JjyRHvjcqoZvmy1qvpuZbyhpuCqGIntAPWfjHlyq9ZM'; 
-const PROXY = 'https://corsproxy.io/?'; 
-const API_MATCHS = 'https://api.pandascore.co/cs/matches?sort=status,-begin_at&per_page=50';
-const API_TEAMS = 'https://api.pandascore.co/cs/teams?sort=-videogame_score&per_page=50';
-const API_PLAYERS = 'https://api.pandascore.co/cs/players?sort=-videogame_score&per_page=50';
+/**
+ * 1. CONFIGURATION
+ * UTILISE TON URL RAILWAY ICI (sans le slash à la fin)
+ */
+const API_URL = 'https://server-production-9224.up.railway.app/'; 
 
 let currentMatches = [];
 let allTeams = [];
 let allPlayers = [];
 let favorites = JSON.parse(localStorage.getItem('cs2_favs')) || [];
 
-async function fetchData(url) {
+/**
+ * 2. MOTEUR DE RÉCUPÉRATION
+ */
+async function fetchData(endpoint) {
     try {
-        const response = await fetch(PROXY + encodeURIComponent(url + '&token=' + PANDA_TOKEN));
+        const response = await fetch(`${API_URL}/${endpoint}`);
+        if (!response.ok) throw new Error("Réponse serveur non valide");
         return await response.json();
-    } catch (e) { return null; }
+    } catch (e) {
+        console.error("Erreur lors de l'appel au serveur :", e);
+        return null;
+    }
 }
 
-function navigateTo(page) {
+/**
+ * 3. AFFICHAGE DES MATCHS
+ */
+async function fetchAndRenderMatches() {
     const container = document.getElementById('match-list');
-    document.querySelectorAll('.nav-link').forEach(l => l.classList.remove('active'));
-    document.getElementById('nav-' + page).classList.add('active');
+    container.innerHTML = `<div class="loader">SYNCING MATCHES...</div>`;
     
-    container.innerHTML = "";
-    if (page === 'matches') {
-        document.getElementById('search-wrapper').style.display = 'block';
-        document.getElementById('sub-tabs').style.display = 'flex';
-        fetchAndRenderMatches();
+    // On appelle la route /matches de TON serveur
+    const data = await fetchData('matches'); 
+    
+    if (data) {
+        currentMatches = data;
+        renderMatchList(currentMatches);
     } else {
-        document.getElementById('search-wrapper').style.display = 'none';
-        document.getElementById('sub-tabs').style.display = 'none';
-        container.innerHTML = `<div class="match-card" onclick="window.open('https://www.hltv.org','_blank')" style="text-align:center;padding:40px;"><h3>HLTV NEWS</h3><p style="color:gray;font-size:0.7rem;margin-top:10px;">Cliquez pour l'actu en direct.</p></div>`;
+        container.innerHTML = `<div style="text-align:center; padding:50px; color:red;">Erreur de connexion au serveur.</div>`;
     }
 }
 
