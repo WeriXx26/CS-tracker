@@ -1,35 +1,74 @@
-const API_URL = 'https://server-production-9224.up.railway.app'; // <--- TON URL SANS / A LA FIN
+const API_URL = 'https://server-production-9224.up.railway.app'; 
 const DEFAULT_LOGO = 'https://raw.githubusercontent.com/werixx26/werixx26.github.io/main/cs2-logo.png';
 
 let currentMatches = [];
 let allTeams = [];
 let allPlayers = [];
-let favorites = JSON.parse(localStorage.getItem('cs2_favs')) || [];
+let currentTab = 'matches'; // Suivi de l'onglet actif pour la recherche
 
 async function fetchData(endpoint) {
     try {
         const response = await fetch(`${API_URL}/${endpoint}`);
-        if (!response.ok) return [];
         const data = await response.json();
         return Array.isArray(data) ? data : [];
-    } catch (e) {
-        return [];
+    } catch (e) { return []; }
+}
+
+// Gestionnaire de recherche intelligente
+function handleSearch() {
+    const q = document.getElementById('global-search').value.toLowerCase();
+    
+    if (currentTab === 'matches') {
+        const filtered = currentMatches.filter(m => 
+            m.opponents[0]?.opponent.name.toLowerCase().includes(q) || 
+            m.opponents[1]?.opponent.name.toLowerCase().includes(q) ||
+            m.league.name.toLowerCase().includes(q)
+        );
+        renderMatchList(filtered);
+    } 
+    else if (currentTab === 'teams') {
+        const filtered = allTeams.filter(t => t.name.toLowerCase().includes(q));
+        renderTeamGrid(filtered);
+    } 
+    else if (currentTab === 'players') {
+        const filtered = allPlayers.filter(p => p.name.toLowerCase().includes(q));
+        renderPlayerGrid(filtered);
     }
 }
 
 function navigateTo(page) {
+    // Gestion de la navigation principale (Matchs vs Actus)
     document.querySelectorAll('.nav-link').forEach(l => l.classList.remove('active'));
-    if(document.getElementById('nav-' + page)) document.getElementById('nav-' + page).classList.add('active');
+    document.getElementById('nav-' + page).classList.add('active');
+    
     const container = document.getElementById('match-list');
-    container.innerHTML = "";
+    const subTabs = document.getElementById('sub-tabs');
+    
     if (page === 'matches') {
-        document.getElementById('search-wrapper').style.display = 'block';
-        document.getElementById('sub-tabs').style.display = 'flex';
-        fetchAndRenderMatches();
+        subTabs.style.display = 'flex';
+        filterMatches('TOUS', document.querySelector('.tab')); // Reset sur TOUS
     } else {
-        document.getElementById('search-wrapper').style.display = 'none';
-        document.getElementById('sub-tabs').style.display = 'none';
-        container.innerHTML = `<div class="match-card" onclick="window.open('https://www.hltv.org','_blank')" style="text-align:center;padding:40px;"><h3>HLTV NEWS</h3><p style="color:gray;font-size:0.7rem;margin-top:10px;">Cliquez pour l'actu.</p></div>`;
+        subTabs.style.display = 'none';
+        currentTab = 'news';
+        container.innerHTML = `<div class="match-card" onclick="window.open('https://www.hltv.org','_blank')" style="text-align:center;padding:40px;"><h3>HLTV NEWS</h3></div>`;
+    }
+}
+
+function filterMatches(type, el) {
+    // Gestion de la surbrillance des filtres (TOUS, EQUIPES, etc.)
+    document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+    el.classList.add('active');
+    document.getElementById('global-search').value = ""; // Reset recherche à chaque changement d'onglet
+
+    if (type === 'EQUIPES') {
+        currentTab = 'teams';
+        fetchAndRenderTeams();
+    } else if (type === 'JOUEURS') {
+        currentTab = 'players';
+        fetchAndRenderPlayers();
+    } else if (type === 'TOUS') {
+        currentTab = 'matches';
+        fetchAndRenderMatches();
     }
 }
 
@@ -42,24 +81,21 @@ async function fetchAndRenderMatches() {
 
 function renderMatchList(list) {
     const container = document.getElementById('match-list');
-    if (!list || list.length === 0) {
-        container.innerHTML = `<div style="text-align:center;padding:20px;">Aucun match.</div>`;
-        return;
-    }
     container.innerHTML = list.map(m => {
-        const t1 = m.opponents[0]?.opponent || { name: "TBD", image_url: DEFAULT_LOGO };
-        const t2 = m.opponents[1]?.opponent || { name: "TBD", image_url: DEFAULT_LOGO };
-        const isLive = m.status === 'running';
-        const time = new Date(m.begin_at).toLocaleTimeString('fr-FR', {hour:'2-digit', minute:'2-digit'});
+        const t1 = m.opponents[0]?.opponent || { name: "TBD" };
+        const t2 = m.opponents[1]?.opponent || { name: "TBD" };
         return `
             <div class="match-card" onclick="openMatchDetail('${m.id}')">
-                <div style="display:flex;justify-content:space-between;font-size:0.5rem;font-family:Orbitron;color:gray;margin-bottom:10px;">
-                    <span>${isLive ? '<b class="live-badge">● LIVE</b>' : time}</span><span>${m.league.name}</span>
-                </div>
                 <div style="display:flex;justify-content:space-between;align-items:center;">
-                    <div style="width:30%;text-align:center;"><img src="${t1.image_url || DEFAULT_LOGO}" width="25" onerror="this.src='${DEFAULT_LOGO}'"><div style="font-size:0.55rem;">${t1.name}</div></div>
-                    <div style="font-size:1.1rem;font-weight:900;">${m.results[0]?.score ?? 0} - ${m.results[1]?.score ?? 0}</div>
-                    <div style="width:30%;text-align:center;"><img src="${t2.image_url || DEFAULT_LOGO}" width="25" onerror="this.src='${DEFAULT_LOGO}'"><div style="font-size:0.55rem;">${t2.name}</div></div>
+                    <div style="width:30%;text-align:center;">
+                        <img src="${t1.image_url || DEFAULT_LOGO}" width="30" onerror="this.src='${DEFAULT_LOGO}'">
+                        <div style="font-size:0.6rem;">${t1.name}</div>
+                    </div>
+                    <div style="font-size:1.2rem;font-weight:bold;">${m.results[0]?.score ?? 0} - ${m.results[1]?.score ?? 0}</div>
+                    <div style="width:30%;text-align:center;">
+                        <img src="${t2.image_url || DEFAULT_LOGO}" width="30" onerror="this.src='${DEFAULT_LOGO}'">
+                        <div style="font-size:0.6rem;">${t2.name}</div>
+                    </div>
                 </div>
             </div>`;
     }).join('');
@@ -68,63 +104,33 @@ function renderMatchList(list) {
 async function fetchAndRenderTeams() {
     const container = document.getElementById('match-list');
     container.innerHTML = `<div class="loader">SYNCING TEAMS...</div>`;
-    allTeams = await fetchData('teams');
-    if (allTeams.length === 0) { container.innerHTML = "Aucune équipe."; return; }
-    container.innerHTML = `<div class="teams-grid">${allTeams.map(t => `
+    if (allTeams.length === 0) allTeams = await fetchData('teams');
+    renderTeamGrid(allTeams);
+}
+
+function renderTeamGrid(list) {
+    const container = document.getElementById('match-list');
+    container.innerHTML = `<div class="teams-grid">${list.map(t => `
         <div class="match-card" style="text-align:center;">
-            <img src="${t.image_url || DEFAULT_LOGO}" style="width:35px;height:35px;object-fit:contain;" onerror="this.src='${DEFAULT_LOGO}'">
-            <div style="font-size:0.6rem;font-weight:bold;margin:5px 0;">${t.name}</div>
-            <button onclick="toggleFav('${t.name}')" style="width:100%;border:none;padding:5px;border-radius:5px;font-size:0.5rem;background:${favorites.includes(t.name)?'#ffb400':'#222'};color:${favorites.includes(t.name)?'#000':'#fff'};">${favorites.includes(t.name)?'SUIVI':'SUIVRE'}</button>
+            <img src="${t.image_url || DEFAULT_LOGO}" style="width:40px;" onerror="this.src='${DEFAULT_LOGO}'">
+            <div style="font-size:0.7rem;font-weight:bold;">${t.name}</div>
         </div>`).join('')}</div>`;
 }
 
 async function fetchAndRenderPlayers() {
     const container = document.getElementById('match-list');
     container.innerHTML = `<div class="loader">SYNCING PLAYERS...</div>`;
-    allPlayers = await fetchData('players');
-    if (allPlayers.length === 0) { container.innerHTML = "Aucun joueur."; return; }
-    container.innerHTML = `<div class="teams-grid">${allPlayers.map(p => `
-        <div class="match-card" onclick="openPlayerDetail('${p.id}')" style="text-align:center;">
-            <img src="${p.image_url || DEFAULT_LOGO}" style="width:40px;height:40px;border-radius:50%;object-fit:cover;border:1px solid #333;" onerror="this.src='${DEFAULT_LOGO}'">
-            <div style="font-size:0.6rem;font-weight:bold;margin-top:5px;">${p.name}</div>
+    if (allPlayers.length === 0) allPlayers = await fetchData('players');
+    renderPlayerGrid(allPlayers);
+}
+
+function renderPlayerGrid(list) {
+    const container = document.getElementById('match-list');
+    container.innerHTML = `<div class="teams-grid">${list.map(p => `
+        <div class="match-card" style="text-align:center;" onclick="openPlayerDetail('${p.id}')">
+            <img src="${p.image_url || DEFAULT_LOGO}" style="width:40px;border-radius:50%;" onerror="this.src='${DEFAULT_LOGO}'">
+            <div style="font-size:0.7rem;">${p.name}</div>
         </div>`).join('')}</div>`;
-}
-
-function filterMatches(type, el) {
-    document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
-    el.classList.add('active');
-    if(type === 'EQUIPES') fetchAndRenderTeams();
-    else if(type === 'JOUEURS') fetchAndRenderPlayers();
-    else if(type === 'FAVORIS') renderMatchList(currentMatches.filter(m => favorites.includes(m.opponents[0]?.opponent.name) || favorites.includes(m.opponents[1]?.opponent.name)));
-    else fetchAndRenderMatches();
-}
-
-function handleSearch() {
-    const q = document.getElementById('global-search').value.toLowerCase();
-    renderMatchList(currentMatches.filter(m => m.opponents[0]?.opponent.name.toLowerCase().includes(q) || m.opponents[1]?.opponent.name.toLowerCase().includes(q) || m.league.name.toLowerCase().includes(q)));
-}
-
-function toggleFav(n) {
-    event.stopPropagation();
-    favorites.includes(n) ? favorites = favorites.filter(f => f !== n) : favorites.push(n);
-    localStorage.setItem('cs2_favs', JSON.stringify(favorites));
-    fetchAndRenderTeams();
-}
-
-function openMatchDetail(id) {
-    const m = currentMatches.find(x => x.id == id);
-    if(!m) return;
-    const d = document.getElementById('match-detail');
-    d.style.display = 'block';
-    d.innerHTML = `<div style="padding:20px;text-align:center;background:#000;height:100vh;"><button onclick="document.getElementById('match-detail').style.display='none'" style="background:#ffb400;border:none;padding:10px 20px;border-radius:10px;font-family:Orbitron;">RETOUR</button><h3 style="margin-top:30px;color:#ffb400;">${m.league.name}</h3><div style="display:flex;justify-content:space-around;align-items:center;margin-top:40px;"><div><img src="${m.opponents[0]?.opponent.image_url || DEFAULT_LOGO}" width="50"><div>${m.opponents[0]?.opponent.name}</div></div><div style="font-size:2rem;font-weight:900;">${m.results[0]?.score ?? 0}:${m.results[1]?.score ?? 0}</div><div><img src="${m.opponents[1]?.opponent.image_url || DEFAULT_LOGO}" width="50"><div>${m.opponents[1]?.opponent.name}</div></div></div></div>`;
-}
-
-function openPlayerDetail(id) {
-    const p = allPlayers.find(x => x.id == id);
-    if(!p) return;
-    const d = document.getElementById('match-detail');
-    d.style.display = 'block';
-    d.innerHTML = `<div style="padding:20px;text-align:center;background:#000;height:100vh;"><button onclick="document.getElementById('match-detail').style.display='none'" style="background:#ffb400;border:none;padding:10px 20px;border-radius:10px;font-family:Orbitron;">RETOUR</button><div style="margin-top:40px;"><img src="${p.image_url || DEFAULT_LOGO}" width="100" style="border-radius:50%;border:2px solid #ffb400;"><h2 style="margin-top:10px;">${p.name}</h2><p style="color:gray;">${p.first_name || ''} ${p.last_name || ''}</p></div><button onclick="window.open('https://www.hltv.org/search?query=${p.name}','_blank')" style="margin-top:40px;width:100%;padding:15px;background:#fff;border:none;border-radius:10px;font-weight:bold;">VOIR HLTV</button></div>`;
 }
 
 window.onload = () => navigateTo('matches');
