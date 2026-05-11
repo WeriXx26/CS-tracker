@@ -1,5 +1,5 @@
-const API_URL = 'https://server-production-9224.up.railway.app'; 
-const DEFAULT_LOGO = 'https://raw.githubusercontent.com/werixx26/werixx26.github.io/main/cs2-logo.png'; 
+const API_URL = 'https://server-production-9224.up.railway.app'; // <--- TON URL SANS / A LA FIN
+const DEFAULT_LOGO = 'https://raw.githubusercontent.com/werixx26/werixx26.github.io/main/cs2-logo.png';
 
 let currentMatches = [];
 let allTeams = [];
@@ -9,14 +9,17 @@ let favorites = JSON.parse(localStorage.getItem('cs2_favs')) || [];
 async function fetchData(endpoint) {
     try {
         const response = await fetch(`${API_URL}/${endpoint}`);
-        if (!response.ok) throw new Error("Erreur");
-        return await response.json();
-    } catch (e) { return null; }
+        if (!response.ok) return [];
+        const data = await response.json();
+        return Array.isArray(data) ? data : [];
+    } catch (e) {
+        return [];
+    }
 }
 
 function navigateTo(page) {
     document.querySelectorAll('.nav-link').forEach(l => l.classList.remove('active'));
-    document.getElementById('nav-' + page).classList.add('active');
+    if(document.getElementById('nav-' + page)) document.getElementById('nav-' + page).classList.add('active');
     const container = document.getElementById('match-list');
     container.innerHTML = "";
     if (page === 'matches') {
@@ -26,20 +29,23 @@ function navigateTo(page) {
     } else {
         document.getElementById('search-wrapper').style.display = 'none';
         document.getElementById('sub-tabs').style.display = 'none';
-        container.innerHTML = `<div class="match-card" onclick="window.open('https://www.hltv.org','_blank')" style="text-align:center;padding:40px;"><h3>HLTV NEWS</h3><p style="color:gray;font-size:0.7rem;margin-top:10px;">Cliquez pour l'actu HLTV.</p></div>`;
+        container.innerHTML = `<div class="match-card" onclick="window.open('https://www.hltv.org','_blank')" style="text-align:center;padding:40px;"><h3>HLTV NEWS</h3><p style="color:gray;font-size:0.7rem;margin-top:10px;">Cliquez pour l'actu.</p></div>`;
     }
 }
 
 async function fetchAndRenderMatches() {
     const container = document.getElementById('match-list');
     container.innerHTML = `<div class="loader">SYNCING MATCHES...</div>`;
-    const data = await fetchData('matches');
-    if (data) { currentMatches = data; renderMatchList(currentMatches); }
-    else { container.innerHTML = `<div style="text-align:center;color:red;padding:20px;">Serveur injoignable</div>`; }
+    currentMatches = await fetchData('matches');
+    renderMatchList(currentMatches);
 }
 
 function renderMatchList(list) {
     const container = document.getElementById('match-list');
+    if (!list || list.length === 0) {
+        container.innerHTML = `<div style="text-align:center;padding:20px;">Aucun match.</div>`;
+        return;
+    }
     container.innerHTML = list.map(m => {
         const t1 = m.opponents[0]?.opponent || { name: "TBD", image_url: DEFAULT_LOGO };
         const t2 = m.opponents[1]?.opponent || { name: "TBD", image_url: DEFAULT_LOGO };
@@ -62,9 +68,9 @@ function renderMatchList(list) {
 async function fetchAndRenderTeams() {
     const container = document.getElementById('match-list');
     container.innerHTML = `<div class="loader">SYNCING TEAMS...</div>`;
-    if (allTeams.length === 0) allTeams = await fetchData('teams');
-    if (!allTeams) return container.innerHTML = "Erreur Teams";
-    container.innerHTML = `<div class="teams-grid">${allTeams.map((t, i) => `
+    allTeams = await fetchData('teams');
+    if (allTeams.length === 0) { container.innerHTML = "Aucune équipe."; return; }
+    container.innerHTML = `<div class="teams-grid">${allTeams.map(t => `
         <div class="match-card" style="text-align:center;">
             <img src="${t.image_url || DEFAULT_LOGO}" style="width:35px;height:35px;object-fit:contain;" onerror="this.src='${DEFAULT_LOGO}'">
             <div style="font-size:0.6rem;font-weight:bold;margin:5px 0;">${t.name}</div>
@@ -74,10 +80,10 @@ async function fetchAndRenderTeams() {
 
 async function fetchAndRenderPlayers() {
     const container = document.getElementById('match-list');
-    container.innerHTML = `<div class="loader">SYNCING TOP 50...</div>`;
-    if (allPlayers.length === 0) allPlayers = await fetchData('players');
-    if (!allPlayers) return container.innerHTML = "Erreur Players";
-    container.innerHTML = `<div class="teams-grid">${allPlayers.map((p, i) => `
+    container.innerHTML = `<div class="loader">SYNCING PLAYERS...</div>`;
+    allPlayers = await fetchData('players');
+    if (allPlayers.length === 0) { container.innerHTML = "Aucun joueur."; return; }
+    container.innerHTML = `<div class="teams-grid">${allPlayers.map(p => `
         <div class="match-card" onclick="openPlayerDetail('${p.id}')" style="text-align:center;">
             <img src="${p.image_url || DEFAULT_LOGO}" style="width:40px;height:40px;border-radius:50%;object-fit:cover;border:1px solid #333;" onerror="this.src='${DEFAULT_LOGO}'">
             <div style="font-size:0.6rem;font-weight:bold;margin-top:5px;">${p.name}</div>
