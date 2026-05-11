@@ -11,7 +11,10 @@
 
 <div class="smartphone-container">
     <header class="app-header">
-        <div class="brand-center"><h1>CS2 TRACKER</h1></div>
+        <div class="brand-center">
+            <h1>CS2 TRACKER</h1>
+        </div>
+        
         <nav class="main-nav">
             <div onclick="navigateTo('matches')" id="nav-matches" class="nav-link active">MATCHS</div>
             <div onclick="navigateTo('news')" id="nav-news" class="nav-link">ACTUS</div>
@@ -23,12 +26,14 @@
             <div class="tab" onclick="filterMatches('FAVORIS', this)">FAVORIS</div>
         </div>
 
-        <div id="search-wrapper" style="padding: 10px; display:none;">
-            <input type="text" id="global-search" placeholder="Chercher une équipe ou un tournoi..." oninput="handleSearch()">
+        <div id="search-wrapper" class="search-bar-container">
+            <input type="text" id="global-search" placeholder="Chercher équipe ou tournoi..." oninput="handleSearch()">
         </div>
     </header>
 
-    <main id="match-list" class="content-area"></main>
+    <main id="match-list" class="content-area">
+        </main>
+
     <div id="match-detail" class="detail-overlay"></div>
 </div>
 
