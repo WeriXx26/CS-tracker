@@ -1,21 +1,131 @@
-:root { --bg: #050505; --card: #121212; --accent: #ffb400; --gray: #888; --white: #fff; }
-* { box-sizing: border-box; margin: 0; padding: 0; }
-body { background: #000; font-family: 'Inter', sans-serif; color: var(--white); display: flex; justify-content: center; }
-.smartphone-container { width: 100%; max-width: 450px; height: 100vh; background: var(--bg); position: relative; overflow: hidden; display: flex; flex-direction: column; }
-.app-header { background: linear-gradient(to bottom, #111, var(--bg)); padding-top: 20px; position: sticky; top: 0; z-index: 100; }
-.brand-center h1 { font-family: 'Orbitron'; font-size: 1.2rem; text-align: center; color: var(--accent); letter-spacing: 2px; }
-.main-nav { display: flex; justify-content: space-around; margin-top: 20px; border-bottom: 1px solid #222; }
-.nav-link { padding: 10px 20px; font-size: 0.8rem; font-weight: bold; color: var(--gray); cursor: pointer; }
-.nav-link.active { color: var(--white); border-bottom: 2px solid var(--accent); }
-.tabs-container { display: flex; gap: 10px; padding: 15px; overflow-x: auto; }
-.tab { padding: 8px 15px; background: #1a1a1a; border-radius: 20px; font-size: 0.7rem; color: var(--gray); cursor: pointer; white-space: nowrap; }
-.tab.active { background: var(--accent); color: #000; font-weight: bold; }
-.search-bar-container { padding: 0 15px 15px; }
-#global-search { width: 100%; padding: 12px; background: #111; border: 1px solid #333; border-radius: 10px; color: white; font-size: 0.8rem; outline: none; }
-.content-area { flex: 1; overflow-y: auto; padding: 10px; }
-.match-card { background: var(--card); border-radius: 15px; padding: 15px; margin-bottom: 12px; border: 1px solid #1a1a1a; position: relative; }
-.teams-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
-.live-badge { color: #ff4444; animation: blink 1.2s infinite; font-weight: bold; }
-@keyframes blink { 0%, 100% { opacity: 1; } 50% { opacity: 0.3; } }
-.loader { text-align: center; padding: 50px; font-family: 'Orbitron'; color: var(--accent); font-size: 0.7rem; }
-.detail-overlay { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: #000; z-index: 200; overflow-y: auto; }
+/* --- CONFIGURATION GLOBALE --- */
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+body {
+    background-color: #000;
+    color: #fff;
+    font-family: 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+    line-height: 1.6;
+}
+
+/* --- BARRE DE NAVIGATION (MATCHS / ACTUS) --- */
+.nav-bar {
+    display: flex;
+    justify-content: center; /* Centre les onglets */
+    align-items: center;
+    gap: 50px;              /* Espace important entre Matchs et Actus */
+    padding: 20px 0;
+    background: #0a0a0a;
+    border-bottom: 1px solid #1a1a1a;
+    position: sticky;
+    top: 0;
+    z-index: 100;
+}
+
+.nav-link {
+    font-family: 'Orbitron', sans-serif; /* Si tu as la font, sinon sans-serif */
+    font-size: 0.9rem;
+    font-weight: 700;
+    color: #555;
+    text-transform: uppercase;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    padding: 5px 0;
+    border-bottom: 2px solid transparent;
+}
+
+.nav-link.active {
+    color: #ffb400;
+    border-bottom: 2px solid #ffb400;
+}
+
+/* --- BARRE DE RECHERCHE --- */
+.search-container {
+    padding: 15px;
+    max-width: 500px;
+    margin: 0 auto; /* Centre la barre de recherche */
+}
+
+#global-search {
+    width: 100%;
+    padding: 12px 20px;
+    background: #111;
+    border: 1px solid #222;
+    border-radius: 10px;
+    color: #fff;
+    font-size: 0.8rem;
+    outline: none;
+}
+
+#global-search:focus {
+    border-color: #ffb400;
+}
+
+/* --- SOUS-ONGLETS (TOUS / EQUIPES / ETC) --- */
+.sub-tabs {
+    display: flex;
+    justify-content: center; /* Centre les pastilles */
+    gap: 12px;               /* Espace entre les pastilles */
+    padding: 10px 15px;
+    overflow-x: auto;
+}
+
+.tab {
+    padding: 8px 18px;
+    background: #111;
+    border-radius: 25px;
+    font-size: 0.7rem;
+    font-weight: 600;
+    color: #888;
+    cursor: pointer;
+    white-space: nowrap;
+    transition: 0.2s;
+    border: 1px solid #222;
+}
+
+.tab.active {
+    background: #ffb400;
+    color: #000;
+    border-color: #ffb400;
+}
+
+/* --- CONTENEUR DE LISTE --- */
+#match-list {
+    padding: 15px;
+    max-width: 600px;
+    margin: 0 auto; /* Centre tout le contenu de l'app */
+}
+
+/* --- CARTES (MATCHS, NEWS, GRILLES) --- */
+.match-card {
+    background: linear-gradient(145deg, #0f0f0f, #151515);
+    border: 1px solid #1a1a1a;
+    border-radius: 12px;
+    padding: 15px;
+    margin-bottom: 15px;
+    transition: transform 0.2s;
+}
+
+.match-card:active {
+    transform: scale(0.98); /* Petit effet de clic sur mobile */
+}
+
+/* --- ANIMATION DU LIVE --- */
+@keyframes blink {
+    0% { opacity: 1; }
+    50% { opacity: 0.3; }
+    100% { opacity: 1; }
+}
+
+.loader {
+    text-align: center;
+    padding: 50px;
+    color: #ffb400;
+    font-family: 'Orbitron', sans-serif;
+    font-size: 0.8rem;
+    letter-spacing: 2px;
+}
