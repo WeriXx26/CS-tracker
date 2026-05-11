@@ -20,11 +20,11 @@
             <div onclick="navigateTo('news')" id="nav-news" class="nav-link">ACTUS</div>
         </nav>
         
-        <div class="tabs-container" id="sub-tabs">
-            <div class="tab active" onclick="filterMatches('TOUS', this)">TOUS</div>
-            <div class="tab" onclick="filterMatches('EQUIPES', this)">ÉQUIPES</div>
-            <div class="tab" onclick="filterMatches('JOUEURS', this)">JOUEURS</div>
-            <div class="tab" onclick="filterMatches('FAVORIS', this)">FAVORIS</div>
+        <div id="sub-tabs" class="sub-tabs">
+    <div class="tab active" onclick="filterContent('TOUS', this)">TOUS</div>
+    <div class="tab" onclick="filterContent('EQUIPES', this)">ÉQUIPES</div>
+    <div class="tab" onclick="filterContent('JOUEURS', this)">JOUEURS</div>
+    <div class="tab" onclick="filterContent('FAVORIS', this)">FAVORIS</div>
         </div>
 
         <div id="search-wrapper" class="search-bar-container">
