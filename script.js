@@ -4,7 +4,7 @@ const DEFAULT_LOGO = 'https://raw.githubusercontent.com/werixx26/werixx26.github
 let currentMatches = [];
 let allTeams = [];
 let allPlayers = [];
-let currentTab = 'matches'; // Suivi de l'onglet actif pour la recherche
+let currentTab = 'matches'; 
 
 async function fetchData(endpoint) {
     try {
@@ -14,10 +14,11 @@ async function fetchData(endpoint) {
     } catch (e) { return []; }
 }
 
-// Gestionnaire de recherche intelligente
+// Recherche intelligente selon l'onglet
 function handleSearch() {
     const q = document.getElementById('global-search').value.toLowerCase();
-    
+    const container = document.getElementById('match-list');
+
     if (currentTab === 'matches') {
         const filtered = currentMatches.filter(m => 
             m.opponents[0]?.opponent.name.toLowerCase().includes(q) || 
@@ -25,40 +26,47 @@ function handleSearch() {
             m.league.name.toLowerCase().includes(q)
         );
         renderMatchList(filtered);
-    } 
-    else if (currentTab === 'teams') {
+    } else if (currentTab === 'teams') {
         const filtered = allTeams.filter(t => t.name.toLowerCase().includes(q));
         renderTeamGrid(filtered);
-    } 
-    else if (currentTab === 'players') {
+    } else if (currentTab === 'players') {
         const filtered = allPlayers.filter(p => p.name.toLowerCase().includes(q));
         renderPlayerGrid(filtered);
     }
 }
 
 function navigateTo(page) {
-    // Gestion de la navigation principale (Matchs vs Actus)
     document.querySelectorAll('.nav-link').forEach(l => l.classList.remove('active'));
     document.getElementById('nav-' + page).classList.add('active');
     
     const container = document.getElementById('match-list');
     const subTabs = document.getElementById('sub-tabs');
-    
+    const searchBar = document.getElementById('global-search');
+
+    // Reset du placeholder de recherche
+    searchBar.placeholder = "RECHERCHE...";
+
     if (page === 'matches') {
         subTabs.style.display = 'flex';
-        filterMatches('TOUS', document.querySelector('.tab')); // Reset sur TOUS
+        document.getElementById('search-wrapper').style.display = 'block';
+        filterMatches('TOUS', document.querySelector('.tab')); 
     } else {
-        subTabs.style.display = 'none';
+        // Mode ACTUS
         currentTab = 'news';
-        container.innerHTML = `<div class="match-card" onclick="window.open('https://www.hltv.org','_blank')" style="text-align:center;padding:40px;"><h3>HLTV NEWS</h3></div>`;
+        subTabs.style.display = 'none';
+        document.getElementById('search-wrapper').style.display = 'none';
+        container.innerHTML = `
+            <div class="match-card" onclick="window.open('https://www.hltv.org','_blank')" style="text-align:center;padding:60px 20px;">
+                <h2 style="font-family:Orbitron; color:#ffb400;">HLTV NEWS</h2>
+                <p style="color:gray; margin-top:10px;">Cliquez pour voir les derniers résultats et news sur HLTV.org</p>
+            </div>`;
     }
 }
 
 function filterMatches(type, el) {
-    // Gestion de la surbrillance des filtres (TOUS, EQUIPES, etc.)
     document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
     el.classList.add('active');
-    document.getElementById('global-search').value = ""; // Reset recherche à chaque changement d'onglet
+    document.getElementById('global-search').value = ""; 
 
     if (type === 'EQUIPES') {
         currentTab = 'teams';
@@ -66,7 +74,7 @@ function filterMatches(type, el) {
     } else if (type === 'JOUEURS') {
         currentTab = 'players';
         fetchAndRenderPlayers();
-    } else if (type === 'TOUS') {
+    } else {
         currentTab = 'matches';
         fetchAndRenderMatches();
     }
@@ -81,20 +89,27 @@ async function fetchAndRenderMatches() {
 
 function renderMatchList(list) {
     const container = document.getElementById('match-list');
+    if (!list || list.length === 0) {
+        container.innerHTML = `<div style="text-align:center;padding:20px;">Aucun match trouvé.</div>`;
+        return;
+    }
     container.innerHTML = list.map(m => {
-        const t1 = m.opponents[0]?.opponent || { name: "TBD" };
-        const t2 = m.opponents[1]?.opponent || { name: "TBD" };
+        const t1 = m.opponents[0]?.opponent || { name: "TBD", image_url: DEFAULT_LOGO };
+        const t2 = m.opponents[1]?.opponent || { name: "TBD", image_url: DEFAULT_LOGO };
+        const logo1 = t1.image_url || DEFAULT_LOGO;
+        const logo2 = t2.image_url || DEFAULT_LOGO;
+        
         return `
             <div class="match-card" onclick="openMatchDetail('${m.id}')">
                 <div style="display:flex;justify-content:space-between;align-items:center;">
                     <div style="width:30%;text-align:center;">
-                        <img src="${t1.image_url || DEFAULT_LOGO}" width="30" onerror="this.src='${DEFAULT_LOGO}'">
-                        <div style="font-size:0.6rem;">${t1.name}</div>
+                        <img src="${logo1}" width="30" height="30" style="object-fit:contain;" onerror="this.src='${DEFAULT_LOGO}'">
+                        <div style="font-size:0.6rem; margin-top:5px;">${t1.name}</div>
                     </div>
-                    <div style="font-size:1.2rem;font-weight:bold;">${m.results[0]?.score ?? 0} - ${m.results[1]?.score ?? 0}</div>
+                    <div style="font-size:1.2rem;font-weight:900;">${m.results[0]?.score ?? 0} - ${m.results[1]?.score ?? 0}</div>
                     <div style="width:30%;text-align:center;">
-                        <img src="${t2.image_url || DEFAULT_LOGO}" width="30" onerror="this.src='${DEFAULT_LOGO}'">
-                        <div style="font-size:0.6rem;">${t2.name}</div>
+                        <img src="${logo2}" width="30" height="30" style="object-fit:contain;" onerror="this.src='${DEFAULT_LOGO}'">
+                        <div style="font-size:0.6rem; margin-top:5px;">${t2.name}</div>
                     </div>
                 </div>
             </div>`;
@@ -110,11 +125,11 @@ async function fetchAndRenderTeams() {
 
 function renderTeamGrid(list) {
     const container = document.getElementById('match-list');
-    container.innerHTML = `<div class="teams-grid">${list.map(t => `
+    container.innerHTML = `<div class="teams-grid">` + list.map(t => `
         <div class="match-card" style="text-align:center;">
-            <img src="${t.image_url || DEFAULT_LOGO}" style="width:40px;" onerror="this.src='${DEFAULT_LOGO}'">
-            <div style="font-size:0.7rem;font-weight:bold;">${t.name}</div>
-        </div>`).join('')}</div>`;
+            <img src="${t.image_url || DEFAULT_LOGO}" style="width:40px;height:40px;object-fit:contain;" onerror="this.src='${DEFAULT_LOGO}'">
+            <div style="font-size:0.7rem;font-weight:bold;margin-top:5px;">${t.name}</div>
+        </div>`).join('') + `</div>`;
 }
 
 async function fetchAndRenderPlayers() {
@@ -126,11 +141,28 @@ async function fetchAndRenderPlayers() {
 
 function renderPlayerGrid(list) {
     const container = document.getElementById('match-list');
-    container.innerHTML = `<div class="teams-grid">${list.map(p => `
+    container.innerHTML = `<div class="teams-grid">` + list.map(p => `
         <div class="match-card" style="text-align:center;" onclick="openPlayerDetail('${p.id}')">
-            <img src="${p.image_url || DEFAULT_LOGO}" style="width:40px;border-radius:50%;" onerror="this.src='${DEFAULT_LOGO}'">
-            <div style="font-size:0.7rem;">${p.name}</div>
-        </div>`).join('')}</div>`;
+            <img src="${p.image_url || DEFAULT_LOGO}" style="width:40px;height:40px;border-radius:50%;object-fit:cover;" onerror="this.src='${DEFAULT_LOGO}'">
+            <div style="font-size:0.7rem;margin-top:5px;">${p.name}</div>
+        </div>`).join('') + `</div>`;
+}
+
+// Fonctions de détails (Modales)
+function openMatchDetail(id) {
+    const m = currentMatches.find(x => x.id == id);
+    if(!m) return;
+    const d = document.getElementById('match-detail');
+    d.style.display = 'block';
+    d.innerHTML = `<div style="padding:20px;text-align:center;background:#000;height:100vh;"><button onclick="document.getElementById('match-detail').style.display='none'" style="background:#ffb400;border:none;padding:10px 20px;border-radius:10px;font-family:Orbitron;">RETOUR</button><h3 style="margin-top:30px;color:#ffb400;">${m.league.name}</h3></div>`;
+}
+
+function openPlayerDetail(id) {
+    const p = allPlayers.find(x => x.id == id);
+    if(!p) return;
+    const d = document.getElementById('match-detail');
+    d.style.display = 'block';
+    d.innerHTML = `<div style="padding:20px;text-align:center;background:#000;height:100vh;"><button onclick="document.getElementById('match-detail').style.display='none'" style="background:#ffb400;border:none;padding:10px 20px;border-radius:10px;font-family:Orbitron;">RETOUR</button><h2>${p.name}</h2></div>`;
 }
 
 window.onload = () => navigateTo('matches');
